@@ -35,3 +35,4 @@ out/
 .env
 .DS_Store
 Thumbs.db
+evidence_vault/

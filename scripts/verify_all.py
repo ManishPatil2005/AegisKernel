@@ -104,6 +104,21 @@ TEST_SUITES = [
         "cmd": [sys.executable, str(ROOT_DIR / "services" / "ai-swarm" / "smt_studio.py")],
         "subsystem": "Formal Methods"
     },
+    {
+        "name": "Forensic Evidence Vault & Cryptographic Chain of Custody",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "forensics" / "evidence_vault.py")],
+        "subsystem": "Forensic Evidence"
+    },
+    {
+        "name": "STIX 2.1 Threat Intelligence Bundle Exporter",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "ai-swarm" / "stix_exporter.py")],
+        "subsystem": "Threat Intelligence"
+    },
+    {
+        "name": "Enterprise Real-Time Kernel Telemetry Generator",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "telemetry-gen" / "live_kernel_stream.py")],
+        "subsystem": "Telemetry Stream"
+    },
 ]
 
 def check_live_endpoints():
