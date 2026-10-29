@@ -91,16 +91,16 @@ Target Gate: USENIX Security / IEEE S&P Submission & Enterprise Pilot Readiness
 - [x] Implement batch streaming consumer group from Kafka to Graph Engine
 
 ### Day 10: Streaming Graph Reduction & Cycle Elimination
-- [ ] Implement in-memory edge aggregation to collapse repeated syscall loops
-- [ ] Implement bounded out-degree throttling (maximum 512 edges per node per minute)
-- [ ] Build forward and backward provenance path extraction algorithms
-- [ ] Benchmark graph ingestion latency (< 25 ms from Kafka event to graph update)
+- [x] Implement in-memory edge aggregation to collapse repeated syscall loops
+- [x] Implement bounded out-degree throttling (maximum 512 edges per node per minute)
+- [x] Build forward and backward provenance path extraction algorithms
+- [x] Benchmark graph ingestion latency (< 25 ms from Kafka event to graph update)
 
 ### Day 11: Real-Time Dynamic Blast-Radius Estimation Engine
-- [ ] Formulate mathematical graph spectral radius calculation over localized subgraphs
-- [ ] Implement privilege-transition distance score between root and unprivileged entities
-- [ ] Build real-time blast-radius scoring service emitting `ThreatBlastScore` metrics
-- [ ] Create unit tests validating blast-radius escalation during privilege escalation exploits
+- [x] Formulate mathematical graph spectral radius calculation over localized subgraphs
+- [x] Implement privilege-transition distance score between root and unprivileged entities
+- [x] Build real-time blast-radius scoring service emitting `ThreatBlastScore` metrics
+- [x] Create unit tests validating blast-radius escalation during privilege escalation exploits
 
 ### Day 12: Historical Snapshotting & Persistent Tiering
 - [ ] Implement temporal sliding-window graph pruner (30-day retention with rolling snapshots)
