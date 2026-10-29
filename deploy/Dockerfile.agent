@@ -1,0 +1,36 @@
+# Multi-Stage Production Dockerfile for AegisKernel In-Kernel Agent
+FROM rust:1.80-bullseye AS builder
+
+WORKDIR /build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    clang \
+    llvm \
+    libelf-dev \
+    protobuf-compiler \
+    musl-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY Cargo.toml ./
+COPY crates ./crates
+COPY proto ./proto
+
+# Compile release binaries with strict invariants
+RUN cargo build --release --workspace
+
+# Minimal Hardened Runtime Container
+FROM debian:bullseye-slim AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libelf1 \
+    ca-certificates \
+    iproute2 \
+    iptables \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=builder /build/target/release/aegis-agent /usr/local/bin/aegis-agent
+
+RUN mkdir -p /etc/aegis /var/log/aegis /var/lib/aegis/wal
+
+ENTRYPOINT ["/usr/local/bin/aegis-agent"]
+CMD ["--config", "/etc/aegis/aegis.yaml"]

@@ -1,0 +1,33 @@
+[Unit]
+Description=AegisKernel Autonomous Kernel-Level Threat-Hunting & In-Kernel Deception Daemon
+Documentation=https://github.com/ManishPatil2005/AegisKernel
+After=network.target local-fs.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/aegis-agent --config /etc/aegis/aegis.yaml
+Restart=always
+RestartSec=3s
+
+# Kernel eBPF & Memory Privileges
+LimitMEMLOCK=infinity
+CapabilityBoundingSet=CAP_BPF CAP_PERFMON CAP_SYS_ADMIN CAP_SYS_RESOURCE CAP_NET_ADMIN
+AmbientCapabilities=CAP_BPF CAP_PERFMON CAP_SYS_ADMIN CAP_SYS_RESOURCE CAP_NET_ADMIN
+
+# Security Hardening & Sandboxing
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/log/aegis /var/run/aegis /var/lib/aegis/wal
+PrivateTmp=true
+ProtectKernelTunables=false
+ProtectControlGroups=true
+MemoryDenyWriteExecute=false
+RestrictRealtime=true
+
+# Resource Boundaries
+MemoryMax=512M
+CPUQuota=15%
+
+[Install]
+WantedBy=multi-user.target
