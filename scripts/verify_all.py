@@ -99,6 +99,11 @@ TEST_SUITES = [
         "cmd": [sys.executable, str(ROOT_DIR / "services" / "ghost-mirror" / "docker_sandbox.py")],
         "subsystem": "Ghost-Mirror Deception"
     },
+    {
+        "name": "Interactive Z3 SMT Studio Theorem Prover Engine",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "ai-swarm" / "smt_studio.py")],
+        "subsystem": "Formal Methods"
+    },
 ]
 
 def check_live_endpoints():
@@ -109,6 +114,7 @@ def check_live_endpoints():
         ("SOC Provenance Graph", "http://127.0.0.1:8500/api/soc/provenance"),
         ("SOC 3D Console UI", "http://127.0.0.1:8500/soc"),
         ("SOC 2D React Flow UI", "http://127.0.0.1:8500/soc/flow"),
+        ("SOC v2.0 Industrial UI", "http://127.0.0.1:8500/v2"),
     ]
     results = []
     for name, url in endpoints:

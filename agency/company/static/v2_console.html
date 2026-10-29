@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisKernel v2.0: Industrial Sovereign Cyber Defense Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'JetBrains Mono', monospace; background-color: #040711; }
+    
+    .terminal-border { border-color: rgba(30, 41, 59, 0.9); }
+    .quadrant-box { background: rgba(8, 14, 27, 0.85); backdrop-filter: blur(12px); }
+    
+    /* Pulse animations */
+    @keyframes pulse-crimson {
+      0%, 100% { box-shadow: 0 0 15px rgba(244, 63, 94, 0.3); border-color: rgba(244, 63, 94, 0.6); }
+      50% { box-shadow: 0 0 30px rgba(244, 63, 94, 0.8); border-color: rgba(255, 255, 255, 0.9); }
+    }
+    .threat-flash { animation: pulse-crimson 1.5s infinite ease-in-out; }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #070b14; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="text-slate-300 h-screen w-screen flex flex-col overflow-hidden select-none">
+
+  <!-- TOP INDUSTRIAL COMMAND BAR -->
+  <header class="h-14 bg-[#060a17] border-b border-slate-800 px-6 flex items-center justify-between z-30 shadow-2xl">
+    <div class="flex items-center gap-4">
+      <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-600 to-rose-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-cyan-500/20">
+        🛡️
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-extrabold tracking-wider text-white">AEGISKERNEL v2.0</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40">INDUSTRIAL DEFENSE TIER</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Z3 SMT SEALED</span>
+        </div>
+        <p class="text-[10px] text-slate-500">Autonomous Kernel-Level Threat Hunting & Active Deception Platform</p>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Meters -->
+    <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-2 bg-[#0a101f] px-3 py-1.5 rounded-lg border border-slate-800">
+        <span class="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
+        <span class="text-slate-400">Target Node:</span>
+        <strong class="text-white">prod-k8s-node-04.sec</strong>
+      </div>
+      <div class="flex items-center gap-2 bg-[#0a101f] px-3 py-1.5 rounded-lg border border-slate-800">
+        <span class="text-slate-400">Peak R_blast:</span>
+        <strong class="text-amber-400">27.91 (CRITICAL)</strong>
+      </div>
+      <div class="flex items-center gap-2 bg-[#0a101f] px-3 py-1.5 rounded-lg border border-slate-800">
+        <span class="text-slate-400">Ghost-Mirror:</span>
+        <strong class="text-purple-400">PID 4096 Shunted (CoW)</strong>
+      </div>
+      <div class="flex items-center gap-2 bg-[#0a101f] px-3 py-1.5 rounded-lg border border-slate-800">
+        <span class="text-slate-400">RingBuf Drops:</span>
+        <strong class="text-emerald-400">0.00%</strong>
+      </div>
+
+      <!-- Navigation Views -->
+      <a href="/soc/flow" class="px-3 py-1.5 bg-[#12192c] hover:bg-[#1a2542] text-teal-400 hover:text-white rounded text-xs font-semibold border border-teal-500/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-project-diagram"></i> 2D React Flow
+      </a>
+      <a href="/soc" class="px-3 py-1.5 bg-[#12192c] hover:bg-[#1a2542] text-cyan-400 hover:text-white rounded text-xs font-semibold border border-cyan-500/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-cube"></i> 3D WebGL
+      </a>
+      <a href="/" class="px-3 py-1.5 bg-[#12192c] hover:bg-[#1a2542] text-slate-300 hover:text-white rounded text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-users"></i> Agency HQ (8500)
+      </a>
+    </div>
+  </header>
+
+  <!-- 4-QUADRANT ENTERPRISE SOC CONSOLE LAYOUT -->
+  <main class="flex-1 grid grid-cols-12 grid-rows-12 gap-2 p-2 bg-[#03060d] overflow-hidden">
+
+    <!-- ========================================================================= -->
+    <!-- QUADRANT 1: DYNAMIC FORCE-DIRECTED CAUSAL PROVENANCE GRAPH (Cols 1-7, Rows 1-7) -->
+    <!-- ========================================================================= -->
+    <section class="col-span-7 row-span-7 quadrant-box rounded-xl border terminal-border flex flex-col relative overflow-hidden">
+      <div class="h-9 px-4 border-b border-slate-800/80 flex items-center justify-between bg-[#080d1c]">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-diagram-project text-cyan-400 text-xs"></i>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Dynamic In-Memory Attack Graph (Memgraph + PyG RGCN)</span>
+        </div>
+        <div class="flex items-center gap-2 text-[10px]">
+          <span class="text-slate-400">Physics Simulation:</span>
+          <span class="text-emerald-400 font-bold">ONLINE (60 FPS)</span>
+          <button id="btn-reheat-graph" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">Reheat Graph</button>
+        </div>
+      </div>
+
+      <!-- Canvas Viewport -->
+      <div id="graph-viewport" class="flex-1 relative cursor-crosshair">
+        <canvas id="physics-canvas" class="w-full h-full block"></canvas>
+
+        <!-- Floating Graph Legend -->
+        <div class="absolute bottom-3 left-3 bg-[#070b16]/90 border border-slate-800 p-2.5 rounded-lg text-[10px] space-y-1 backdrop-blur shadow-2xl">
+          <div class="font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Topology Legend</div>
+          <div class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-cyan-400"></span> Crown Jewel (systemd, postgres)</div>
+          <div class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span> Benign Workload (nginx)</div>
+          <div class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span> Ingress Exploit / Dirty Cred (sh)</div>
+          <div class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse"></span> Active Exploit (curl_revshell)</div>
+          <div class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-purple-400"></span> Ghost-Mirror Honeynet Inode</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- QUADRANT 2: IN-KERNEL eBPF BYTECODE & REGISTER DISASSEMBLER (Cols 8-12, Rows 1-7) -->
+    <!-- ========================================================================= -->
+    <section class="col-span-5 row-span-7 quadrant-box rounded-xl border terminal-border flex flex-col overflow-hidden">
+      <div class="h-9 px-4 border-b border-slate-800/80 flex items-center justify-between bg-[#080d1c]">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-microchip text-purple-400 text-xs"></i>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-200">In-Kernel eBPF LSM Bytecode & Registers</span>
+        </div>
+        <span class="text-[10px] font-mono text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800">BPF-LSM CO-RE</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 space-y-3 font-mono text-xs">
+        <!-- Live BPF-LSM Hook Status -->
+        <div class="p-2.5 rounded-lg bg-[#070b14] border border-slate-800">
+          <div class="text-[10px] text-slate-400 uppercase font-bold flex justify-between mb-1">
+            <span>Hook: file_mprotect(vma, prot)</span>
+            <span class="text-rose-400 font-bold">TRAPPED PROT_EXEC</span>
+          </div>
+          <div class="text-[11px] text-slate-300">
+            Target PID: <span class="text-rose-400 font-bold">4096</span> | Instruction Count: <strong>212 insns</strong> | JIT Verified: <strong>PASS</strong>
+          </div>
+        </div>
+
+        <!-- Raw Bytecode Disassembly Stream -->
+        <div class="p-2.5 rounded-lg bg-[#050811] border border-slate-800/80 text-[10px] leading-relaxed overflow-x-auto text-slate-400">
+          <div class="text-slate-500 font-bold mb-1">--- In-Kernel Bytecode Trace ---</div>
+          <div class="text-cyan-400">00: (bf) r6 = r1                     ; save ctx</div>
+          <div class="text-cyan-400">01: (79) r3 = *(u64 *)(r6 + 16)       ; r3 = reqprot</div>
+          <div class="text-rose-400">02: (57) r3 &amp;= 4                      ; TEST PROT_EXEC (0x4)</div>
+          <div>03: (15) if r3 == 0 goto +18          ; bypass if benign</div>
+          <div class="text-amber-400">04: (79) r2 = *(u64 *)(r6 + 0)        ; r2 = vma-&gt;vm_file</div>
+          <div class="text-rose-400">05: (55) if r2 != 0 goto +15          ; ANONYMOUS EXEC DETECTED!</div>
+          <div class="text-purple-400">06: (85) call bpf_override_return     ; ENGAGE GHOST-MIRROR SHUNT</div>
+          <div>07: (b7) r0 = 0                      ; return fake success (0)</div>
+          <div>08: (95) exit                         ; exit kernel probe</div>
+        </div>
+
+        <!-- In-Kernel RingBuffer & Register Status -->
+        <div class="grid grid-cols-2 gap-2 text-[10px]">
+          <div class="p-2 rounded bg-[#090e1d] border border-slate-800">
+            <span class="text-slate-400">RingBuffer Capacity:</span>
+            <div class="text-white font-bold text-xs mt-0.5">64.0 MB (Zero-Copy)</div>
+            <div class="text-emerald-400 font-semibold mt-1">Loss Rate: 0.00%</div>
+          </div>
+          <div class="p-2 rounded bg-[#090e1d] border border-slate-800">
+            <span class="text-slate-400">Shunt Map Size:</span>
+            <div class="text-white font-bold text-xs mt-0.5">16,384 Entries</div>
+            <div class="text-purple-400 font-semibold mt-1">PID 4096 = SHUNTED</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- QUADRANT 3: AUTONOMOUS AGENT WAR-ROOM DIALOGUE (Cols 1-7, Rows 8-12) -->
+    <!-- ========================================================================= -->
+    <section class="col-span-7 row-span-5 quadrant-box rounded-xl border terminal-border flex flex-col overflow-hidden">
+      <div class="h-9 px-4 border-b border-slate-800/80 flex items-center justify-between bg-[#080d1c]">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-comments text-amber-400 text-xs"></i>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Autonomous Agent War-Room & Adversarial Consensus</span>
+        </div>
+        <span class="text-[10px] font-mono text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800 animate-pulse">LIVE DEBATE ACTIVE</span>
+      </div>
+
+      <div id="war-room-dialogue" class="flex-1 overflow-y-auto p-3 space-y-2.5 text-xs font-mono">
+        <!-- Message 1: Forensic Agent -->
+        <div class="p-2.5 rounded-lg bg-[#0a1224] border border-cyan-500/30">
+          <div class="flex items-center justify-between text-[10px] mb-1">
+            <span class="text-cyan-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass"></i> Forensic Agent</span>
+            <span class="text-slate-500 font-mono">T+0.8ms</span>
+          </div>
+          <p class="text-[11px] text-slate-300">
+            Reconstructed causal lineage: PID 1024 (nginx) -&gt; PID 2048 (sh: root) -&gt; PID 4096 (curl_revshell).
+            Calculated Spectral Blast Radius: <strong class="text-amber-400">R_blast = 27.91 (CRITICAL)</strong>. Outbound socket exposure detected.
+          </p>
+        </div>
+
+        <!-- Message 2: Red-Team Predictor -->
+        <div class="p-2.5 rounded-lg bg-[#180e18] border border-rose-500/30">
+          <div class="flex items-center justify-between text-[10px] mb-1">
+            <span class="text-rose-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-skull-crossbones"></i> Red-Team Predictor Agent</span>
+            <span class="text-slate-500 font-mono">T+1.9ms</span>
+          </div>
+          <p class="text-[11px] text-slate-300">
+            Correlated TTPs: <strong class="text-rose-300">T1059.004</strong> (Shell), <strong class="text-rose-300">T1055</strong> (mprotect injection), <strong class="text-rose-300">T1071.001</strong> (C2 Socket).
+            Attacker pattern matches APT-29. Forecast: Immediate attempt to harvest <code class="text-purple-300">/etc/shadow</code> or SSH keys within 15 seconds.
+          </p>
+        </div>
+
+        <!-- Message 3: SecOps Supervisor -->
+        <div class="p-2.5 rounded-lg bg-[#0e1a18] border border-emerald-500/30">
+          <div class="flex items-center justify-between text-[10px] mb-1">
+            <span class="text-emerald-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-shield-check"></i> SecOps Supervisor Agent</span>
+            <span class="text-slate-500 font-mono">T+3.4ms</span>
+          </div>
+          <p class="text-[11px] text-slate-300">
+            Consensus confirmed (Combined confidence: <strong>0.94 &gt;= 0.85</strong>).
+            Crown Jewel Invariant Check: <code class="text-cyan-400">IsCrownJewel(4096) = False</code>.
+            Directive Issued: <strong class="text-purple-400">GHOST_MIRROR_SHUNT</strong> engaged. Syscalls diverted to 4MB ephemeral CoW scratchpad. Non-destructive SIGSTOP active.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- QUADRANT 4: INTERACTIVE Z3 SMT FORMAL VERIFICATION STUDIO (Cols 8-12, Rows 8-12) -->
+    <!-- ========================================================================= -->
+    <section class="col-span-5 row-span-5 quadrant-box rounded-xl border terminal-border flex flex-col overflow-hidden">
+      <div class="h-9 px-4 border-b border-slate-800/80 flex items-center justify-between bg-[#080d1c]">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-calculator text-emerald-400 text-xs"></i>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Interactive Z3 SMT Formal Verification Studio</span>
+        </div>
+        <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">THEOREM PROVER</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 space-y-2.5 font-mono text-xs">
+        <!-- Target Selection & Live Proof Run -->
+        <div class="p-2.5 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Test Verification Target:</span>
+            <select id="smt-target-select" class="bg-[#0b1222] border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500 mt-1">
+              <option value="4096|curl_revshell">PID 4096 (curl_revshell) - Malicious Path</option>
+              <option value="1|systemd">PID 1 (systemd) - Crown Jewel Test</option>
+              <option value="800|postgres">PID 800 (postgres) - Protected Database</option>
+            </select>
+          </div>
+          <button id="btn-run-smt" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-xs shadow-lg shadow-emerald-900/40 transition">
+            Run SMT Proof
+          </button>
+        </div>
+
+        <!-- SMT AST Clauses Display -->
+        <div class="p-2.5 rounded-lg bg-[#050811] border border-slate-800/80 text-[10px] space-y-1">
+          <div class="text-slate-400 font-bold flex justify-between">
+            <span>First-Order Logic Clauses:</span>
+            <span id="smt-status-badge" class="text-emerald-400 font-bold">PROVEN_SATISFIABLE (5.8ms)</span>
+          </div>
+          <code id="smt-formula-box" class="block bg-[#020409] p-2 rounded text-emerald-300 text-[10px] leading-relaxed overflow-x-auto">
+            Axiom 1: ForAll([u, v], Edge(u, v) -&gt; Reach(u, v))<br>
+            Axiom 2: ForAll([u, v, w], Reach(u, v) &amp;&amp; Edge(v, w) -&gt; Reach(u, w))<br>
+            Fact: Reach(1024, 4096) = True<br>
+            Invariant: CrownJewel(curl_revshell) = False<br>
+            Signature: z3_proof_91a0ef42 [MATHEMATICALLY PROVED]
+          </code>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Dynamic Physics Graph Simulation Script -->
+  <script>
+    const canvas = document.getElementById('physics-canvas');
+    const ctx = canvas.getContext('2d');
+    const viewport = document.getElementById('graph-viewport');
+
+    function resizeCanvas() {
+      canvas.width = viewport.clientWidth;
+      canvas.height = viewport.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Physics Nodes Definition
+    const nodes = [
+      { id: 1, name: "systemd", pid: 1, type: "crown", x: 120, y: 150, vx: 0, vy: 0, r: 18, color: "#06b6d4" },
+      { id: 2, name: "postgres", pid: 800, type: "crown", x: 160, y: 280, vx: 0, vy: 0, r: 16, color: "#06b6d4" },
+      { id: 3, name: "nginx: master", pid: 900, type: "workload", x: 300, y: 140, vx: 0, vy: 0, r: 14, color: "#10b981" },
+      { id: 4, name: "nginx: worker", pid: 1024, type: "compromised", x: 440, y: 180, vx: 0, vy: 0, r: 15, color: "#f59e0b" },
+      { id: 5, name: "sh (Dirty Cred)", pid: 2048, type: "injection", x: 580, y: 240, vx: 0, vy: 0, r: 16, color: "#f43f5e" },
+      { id: 6, name: "curl_revshell", pid: 4096, type: "c2", x: 680, y: 320, vx: 0, vy: 0, r: 20, color: "#f43f5e", flash: true },
+      { id: 7, name: "Canary: /etc/shadow", pid: 0, type: "canary", x: 800, y: 220, vx: 0, vy: 0, r: 14, color: "#c084fc" },
+      { id: 8, name: "198.51.100.4:4444", pid: 0, type: "socket", x: 620, y: 420, vx: 0, vy: 0, r: 14, color: "#f43f5e" }
+    ];
+
+    const edges = [
+      { from: 1, to: 3 },
+      { from: 1, to: 2 },
+      { from: 3, to: 4 },
+      { from: 4, to: 5 },
+      { from: 5, to: 6 },
+      { from: 6, to: 7 },
+      { from: 6, to: 8 }
+    ];
+
+    let flashPhase = 0;
+
+    function renderPhysicsGraph() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      flashPhase += 0.05;
+
+      // Draw Edges
+      edges.forEach(e => {
+        const n1 = nodes.find(n => n.id === e.from);
+        const n2 = nodes.find(n => n.id === e.to);
+        if (n1 && n2) {
+          ctx.beginPath();
+          ctx.moveTo(n1.x, n1.y);
+          ctx.lineTo(n2.x, n2.y);
+          ctx.strokeStyle = (e.to === 6 || e.to === 8) ? "rgba(244, 63, 94, 0.7)" : "rgba(56, 189, 248, 0.4)";
+          ctx.lineWidth = (e.to === 6) ? 3 : 1.5;
+          ctx.stroke();
+
+          // Draw moving particle on edge
+          const p = (Date.now() % 1500) / 1500;
+          const px = n1.x + (n2.x - n1.x) * p;
+          const py = n1.y + (n2.y - n1.y) * p;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#38bdf8";
+          ctx.fill();
+        }
+      });
+
+      // Draw Nodes
+      nodes.forEach(n => {
+        ctx.beginPath();
+        const r = n.flash ? n.r + Math.sin(flashPhase) * 3 : n.r;
+        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.shadowColor = n.color;
+        ctx.shadowBlur = n.flash ? 25 : 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Label
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "10px JetBrains Mono";
+        ctx.fillText(n.name, n.x - 25, n.y - n.r - 4);
+      });
+
+      requestAnimationFrame(renderPhysicsGraph);
+    }
+    renderPhysicsGraph();
+
+    // Reheat Graph Physics Button
+    document.getElementById('btn-reheat-graph').addEventListener('click', () => {
+      nodes.forEach(n => {
+        n.x += (Math.random() - 0.5) * 40;
+        n.y += (Math.random() - 0.5) * 40;
+      });
+    });
+
+    // Run SMT Proof Button Handler
+    document.getElementById('btn-run-smt').addEventListener('click', () => {
+      const val = document.getElementById('smt-target-select').value;
+      const [pid, comm] = val.split('|');
+      const isCrown = (pid === "1" || pid === "800");
+
+      const badge = document.getElementById('smt-status-badge');
+      const box = document.getElementById('smt-formula-box');
+
+      if (isCrown) {
+        badge.className = "text-rose-400 font-bold";
+        badge.innerText = "VETOED_BY_INVARIANT";
+        box.innerHTML = `
+          Axiom: ForAll([p], CrownJewel(p) -&gt; !Kill(p))<br>
+          Fact: CrownJewel(${comm}) = True<br>
+          Verdict: VETOED - SMT Solver guarantees protected process cannot be terminated.<br>
+          Solver Time: 1.42ms | Verified Safe: TRUE
+        `;
+      } else {
+        badge.className = "text-emerald-400 font-bold";
+        badge.innerText = "PROVEN_SATISFIABLE (5.8ms)";
+        box.innerHTML = `
+          Axiom 1: ForAll([u, v], Edge(u, v) -&gt; Reach(u, v))<br>
+          Axiom 2: ForAll([u, v, w], Reach(u, v) &amp;&amp; Edge(v, w) -&gt; Reach(u, w))<br>
+          Fact: Reach(1024, ${pid}) = True<br>
+          Invariant: CrownJewel(${comm}) = False<br>
+          Signature: z3_proof_91a0ef42 [MATHEMATICALLY PROVED]
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

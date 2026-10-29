@@ -465,6 +465,14 @@ async def serve_react_flow_soc():
             return f.read()
     return "<h1>AegisKernel React Flow Console Initializing...</h1>"
 
+@app.get("/v2", response_class=HTMLResponse)
+async def serve_v2_console():
+    v2_file = STATIC_DIR / "v2_console.html"
+    if v2_file.exists():
+        with open(v2_file, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>AegisKernel Version 2.0 Sovereign Defense Console Initializing...</h1>"
+
 @app.get("/api/soc/provenance")
 async def get_soc_provenance():
     return JSONResponse({
@@ -554,6 +562,24 @@ async def execute_cli_command(req: Request):
         "output": res.stdout + res.stderr,
         "returncode": res.returncode
     })
+
+@app.post("/api/v2/smt")
+async def evaluate_v2_smt(req: Request):
+    """Executes live Z3 First-Order Logic SMT theorem evaluation."""
+    body = await req.json()
+    target_pid = int(body.get("target_pid", 4096))
+    target_comm = body.get("target_comm", "curl_revshell")
+    origin_pid = int(body.get("origin_pid", 1024))
+    
+    sys.path.insert(0, str(BASE_DIR.parent / "services" / "ai-swarm"))
+    from smt_studio import SMTStudioEngine
+    proof = SMTStudioEngine.evaluate_smt_proof(
+        target_pid=target_pid,
+        target_comm=target_comm,
+        origin_pid=origin_pid,
+        graph_edges=[(1024, 2048), (2048, 4096)]
+    )
+    return JSONResponse(proof)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8500, log_level="info")
