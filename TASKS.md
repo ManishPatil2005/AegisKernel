@@ -24,17 +24,22 @@ Target Gate: USENIX Security / IEEE S&P Submission & Enterprise Pilot Readiness
 - [x] Initialize Git repository with branch protection rules
 - [x] Author `RULES.md` (Engineering Constitution & Security Invariants)
 - [x] Author `TASKS.md` (The 30-Day Master God Plan)
-- [ ] Author `MEMORY.md` (State & Context Registry)
-- [ ] Author `DECISIONS.md` (Architecture Decision Records ADR-0001 to ADR-0005)
-- [ ] Author `PRD.md` (Comprehensive Product Requirements Document)
-- [ ] Author `ARCHITECTURE.md` (Complete Technical Specification)
-- [ ] Author `SECURITY.md` (Threat Model & Vulnerability Disclosure)
-- [ ] Author `TEST_PLAN.md` (Verification, Chaos & Kernel Matrix Matrix)
-- [ ] Author `README.md` (Public Open-Source Blueprint)
+- [x] Author `MEMORY.md` (State & Context Registry)
+- [x] Author `DECISIONS.md` (Architecture Decision Records ADR-0001 to ADR-0005)
+- [x] Author `PRD.md` (Comprehensive Product Requirements Document)
+- [x] Author `ARCHITECTURE.md` (Complete Technical Specification)
+- [x] Author `SECURITY.md` (Threat Model & Vulnerability Disclosure)
+- [x] Author `TEST_PLAN.md` (Verification, Chaos & Kernel Matrix Matrix)
+- [x] Author `README.md` (Public Open-Source Blueprint)
+- [x] Author `DESIGN.md` (Domain-Driven Design & Component Contracts)
 
 ### Day 2: eBPF Toolchain & Development Environment
-- [ ] Set up Rust workspace with `cargo` (`aegis-ebpf`, `aegis-agent`, `aegis-proto`, `aegis-core`)
-- [ ] Configure `aya` / `libbpf-rs` with BTF (BPF Type Format) and CO-RE (*Compile Once - Run Everywhere*)
+- [x] Set up Rust workspace with `cargo` (`aegis-ebpf`, `aegis-agent`, `aegis-proto`, `aegis-core`)
+- [x] Implement binary C-compatible telemetry data contracts (`aegis-proto`)
+- [x] Implement core process causality DAG and blast-radius calculator (`aegis-core`)
+- [x] Implement edge ingestion agent daemon with regex credential sanitization (`aegis-agent`)
+- [x] Implement in-kernel BPF C probe source targeting `sched_process_exec` with 64 MB ring buffer (`aegis-ebpf`)
+- [x] Implement Neuro-Symbolic Multi-Agent AI Swarm with Z3 SMT solver verification (`services/ai-swarm`)
 - [ ] Create QEMU virtualized test harness for Linux kernel targets (5.15 LTS, 6.1 LTS, 6.6 LTS)
 - [ ] Implement Makefile / Taskfile for automated BPF compilation and verification
 
