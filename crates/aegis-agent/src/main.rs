@@ -11,7 +11,7 @@ mod sanitizer;
 use aegis_core::HostProcessTree;
 use aegis_proto::{AegisEventType, RawKernelEvent, TelemetryEvent, MAX_COMM_LEN, MAX_PATH_LEN};
 use sanitizer::sanitize_telemetry_string;
-use tracing::{info, warn};
+use tracing::{error, info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -29,9 +29,9 @@ async fn main() -> anyhow::Result<()> {
 
     let mut process_tree = HostProcessTree::new();
 
-    // Demonstration synthetic telemetry stream simulating kernel ring buffer consumption
     info!("Initializing BPF ring buffer consumer pipeline");
 
+    // Comprehensive demonstration stream simulating in-kernel BPF ring buffer records
     let sample_events = vec![
         RawKernelEvent {
             timestamp_ns: 1_000_000,
@@ -64,7 +64,7 @@ async fn main() -> anyhow::Result<()> {
             pid: 4096,
             tgid: 4096,
             ppid: 1,
-            uid: 0, // Privilege escalation
+            uid: 0, // Privilege escalation to root
             gid: 0,
             event_type: AegisEventType::PrivilegeEscalation as u32,
             cgroup_id: 10,
@@ -72,22 +72,93 @@ async fn main() -> anyhow::Result<()> {
             comm: create_comm_buf(b"curl"),
             filename: create_path_buf(b"/usr/bin/curl"),
         },
+        RawKernelEvent {
+            timestamp_ns: 4_000_000,
+            pid: 4096,
+            tgid: 4096,
+            ppid: 1,
+            uid: 0,
+            gid: 0,
+            event_type: AegisEventType::MemoryProtect as u32, // Fileless code injection
+            cgroup_id: 10,
+            lineage_hash: 0x2002,
+            comm: create_comm_buf(b"curl"),
+            filename: create_path_buf(b"mprotect(PROT_EXEC)"),
+        },
+        RawKernelEvent {
+            timestamp_ns: 5_000_000,
+            pid: 4096,
+            tgid: 4096,
+            ppid: 1,
+            uid: 0,
+            gid: 0,
+            event_type: AegisEventType::SocketConnect as u32, // Outbound C2 connection
+            cgroup_id: 10,
+            lineage_hash: 0x2002,
+            comm: create_comm_buf(b"curl"),
+            filename: create_path_buf(b"connect(198.51.100.24:4444)"),
+        },
+        RawKernelEvent {
+            timestamp_ns: 6_000_000,
+            pid: 4096,
+            tgid: 4096,
+            ppid: 1,
+            uid: 0,
+            gid: 0,
+            event_type: AegisEventType::GhostShunt as u32, // Trapped in Ghost-Mirror deception
+            cgroup_id: 10,
+            lineage_hash: 0x2002,
+            comm: create_comm_buf(b"curl"),
+            filename: create_path_buf(b"ghost_mirror_shunt(active)"),
+        },
     ];
 
     for raw in sample_events {
         match TelemetryEvent::from_raw(&raw) {
             Ok(mut event) => {
-                // Apply security credential sanitization
                 event.filename = sanitize_telemetry_string(&event.filename);
 
-                info!(
-                    pid = event.pid,
-                    ppid = event.ppid,
-                    comm = %event.comm,
-                    event_type = ?event.event_type,
-                    sanitized_cmd = %event.filename,
-                    "Ingested kernel telemetry event"
-                );
+                match event.event_type {
+                    AegisEventType::ProcessExec | AegisEventType::ProcessExit => {
+                        info!(
+                            pid = event.pid,
+                            comm = %event.comm,
+                            event_type = ?event.event_type,
+                            cmd = %event.filename,
+                            "Process lifecycle event ingested"
+                        );
+                    }
+                    AegisEventType::PrivilegeEscalation => {
+                        warn!(
+                            pid = event.pid,
+                            uid = event.uid,
+                            comm = %event.comm,
+                            "PRIVILEGE ESCALATION DETECTED: Process transitioned to UID 0 (root)"
+                        );
+                    }
+                    AegisEventType::MemoryProtect => {
+                        error!(
+                            pid = event.pid,
+                            comm = %event.comm,
+                            "FILELESS INJECTION DETECTED: Process allocated executable memory (PROT_EXEC)"
+                        );
+                    }
+                    AegisEventType::SocketConnect => {
+                        info!(
+                            pid = event.pid,
+                            comm = %event.comm,
+                            target = %event.filename,
+                            "Outbound socket connection tracked"
+                        );
+                    }
+                    AegisEventType::GhostShunt | AegisEventType::CanaryHit => {
+                        warn!(
+                            pid = event.pid,
+                            comm = %event.comm,
+                            "GHOST-MIRROR DECEPTION ACTIVE: Malicious process shunted to synthetic memory"
+                        );
+                    }
+                }
 
                 process_tree.ingest_event(&event);
 
@@ -96,7 +167,7 @@ async fn main() -> anyhow::Result<()> {
                         warn!(
                             pid = entity.pid,
                             blast_radius = entity.blast_radius,
-                            "HIGH THREAT BLAST-RADIUS DETECTED: Triggering anomaly investigation"
+                            "THREAT BLAST RADIUS EXCEEDED THRESHOLD: Triggering AI Swarm Triage"
                         );
                     }
                 }
