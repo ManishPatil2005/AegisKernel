@@ -128,6 +128,28 @@ live_workload_schedule = [
         "deliverable": "tests/adversarial-ai/ & MITRE ATT&CK Scenarios",
         "progress_pct": 80,
     },
+    {
+        "agent": "Developer Experience & Documentation Architect",
+        "avatar": "📖",
+        "division": "Engineering",
+        "current_task": "Hardcore README.md GitHub Presence Overhaul & Benchmark Synthesis",
+        "milestone": "Elite GitHub Showcase & Documentation",
+        "started_at": "00:58:12",
+        "status": "WORKING",
+        "deliverable": "README.md & docs/HARDCORE_COUNCIL_REVIEW.md",
+        "progress_pct": 100,
+    },
+    {
+        "agent": "Visual Assets & Markdown Typographer",
+        "avatar": "🎨",
+        "division": "Engineering",
+        "current_task": "ASCII Architecture Art, Continuous-Time Math & Multi-Layer Badges",
+        "milestone": "Silicon Valley Tier-1 Branding",
+        "started_at": "00:58:34",
+        "status": "WORKING",
+        "deliverable": "README.md & 2D React Flow (/soc/flow)",
+        "progress_pct": 100,
+    },
 ]
 
 # Live permission requests managed by the Permission Gatekeeper Agent
