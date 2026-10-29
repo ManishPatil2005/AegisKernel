@@ -199,6 +199,12 @@
                     <span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">STREAMING</span>
                 </div>
 
+                <div class="mt-2 flex items-center space-x-2">
+                    <span class="text-xs font-mono text-cyan-400 font-bold">aegisctl&gt;</span>
+                    <input id="cli-input" type="text" placeholder="commands: 'status', 'verify', 'simulate', 'mom'..." class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-mono focus:outline-none focus:border-cyan-500" onkeydown="if(event.key==='Enter') executeWebCli()">
+                    <button onclick="executeWebCli()" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-mono font-semibold">Exec</button>
+                </div>
+
                 <div id="terminal-logs" class="flex-1 overflow-y-auto terminal-scroll mt-3 space-y-2 text-xs font-mono">
                     <!-- Populated dynamically via SSE stream -->
                 </div>
@@ -587,6 +593,39 @@
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+            }
+        }
+
+        async function executeWebCli() {
+            const input = document.getElementById('cli-input');
+            const cmd = input.value.trim() || 'status';
+            addLogToTerminal({
+                timestamp: new Date().toLocaleTimeString(),
+                agent: "Operator",
+                message: `aegisctl ${cmd}`,
+                status: "info"
+            });
+            input.value = '';
+            try {
+                const res = await fetch('/api/cli/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                const data = await res.json();
+                addLogToTerminal({
+                    timestamp: new Date().toLocaleTimeString(),
+                    agent: "aegisctl",
+                    message: data.output,
+                    status: data.status === 'success' ? 'success' : 'error'
+                });
+            } catch (e) {
+                addLogToTerminal({
+                    timestamp: new Date().toLocaleTimeString(),
+                    agent: "aegisctl",
+                    message: "Execution error: " + e,
+                    status: "error"
+                });
             }
         }
 

@@ -500,5 +500,30 @@ async def trigger_simulation():
         })
     return JSONResponse({"status": "script_not_found"}, status_code=500)
 
+@app.post("/api/cli/exec")
+async def execute_cli_command(req: Request):
+    """Executes aegisctl operator commands from the web console."""
+    import subprocess
+    body = await req.json()
+    command = body.get("command", "status").strip()
+    allowed_commands = ["status", "verify", "simulate", "mom"]
+    
+    cmd_parts = command.split()
+    subcmd = cmd_parts[0] if cmd_parts else "status"
+    
+    if subcmd not in allowed_commands:
+        return JSONResponse({"status": "error", "output": f"Command '{subcmd}' not permitted. Allowed: {', '.join(allowed_commands)}"})
+
+    cli_script = BASE_DIR.parent / "cli" / "aegisctl.py"
+    if not cli_script.exists():
+        return JSONResponse({"status": "error", "output": "aegisctl.py not found on disk"})
+
+    res = subprocess.run([sys.executable, str(cli_script), subcmd], capture_output=True, text=True)
+    return JSONResponse({
+        "status": "success" if res.returncode == 0 else "error",
+        "output": res.stdout + res.stderr,
+        "returncode": res.returncode
+    })
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8500, log_level="info")
