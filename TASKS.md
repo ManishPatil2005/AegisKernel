@@ -103,16 +103,16 @@ Target Gate: USENIX Security / IEEE S&P Submission & Enterprise Pilot Readiness
 - [x] Create unit tests validating blast-radius escalation during privilege escalation exploits
 
 ### Day 12: Historical Snapshotting & Persistent Tiering
-- [ ] Implement temporal sliding-window graph pruner (30-day retention with rolling snapshots)
-- [ ] Configure cold-tier parquet archiving to S3/MinIO for long-term forensic investigations
-- [ ] Implement differential graph query API over gRPC with mTLS
-- [ ] Verify zero data loss during simulated graph node failover
+- [x] Implement temporal sliding-window graph pruner (30-day retention with rolling snapshots)
+- [x] Configure cold-tier parquet archiving to S3/MinIO for long-term forensic investigations
+- [x] Implement differential graph query API over gRPC with mTLS
+- [x] Verify zero data loss during simulated graph node failover
 
 ### Day 13: Adversarial Graph Perturbation Defense
-- [ ] Implement causal path attestation filter to drop spurious unconnected system call loops
-- [ ] Build graph normalization routines to counteract structural mimicry attacks
-- [ ] Test resistance against synthetic edge flooding (injecting 10,000 random file reads)
-- [ ] Verify that graph anomaly scores remain stable under structural noise
+- [x] Implement causal path attestation filter to drop spurious unconnected system call loops
+- [x] Build graph normalization routines to counteract structural mimicry attacks
+- [x] Test resistance against synthetic edge flooding (injecting 10,000 random file reads)
+- [x] Verify that graph anomaly scores remain stable under structural noise
 
 ### Day 14: Week 2 Integration & End-to-End Pipeline Stress Test
 - [ ] Stream 5,000,000 simulated DARPA TC events through Agent -> Kafka -> Graph Engine
