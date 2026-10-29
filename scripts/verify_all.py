@@ -84,6 +84,21 @@ TEST_SUITES = [
         "cmd": [sys.executable, str(ROOT_DIR / "tests" / "fuzzing" / "stress_fuzzer.py")],
         "subsystem": "Fuzzing & Robustness"
     },
+    {
+        "name": "LangGraph Tripartite Swarm (Forensic, RedTeam & Supervisor)",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "ai-swarm" / "langgraph_swarm.py")],
+        "subsystem": "LangGraph Swarm"
+    },
+    {
+        "name": "PyTorch Geometric RGCN Relational Classifier",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "ct-htgn-engine" / "rgcn_model.py")],
+        "subsystem": "Graph ML"
+    },
+    {
+        "name": "Ephemeral Docker Honeynet Sandbox Launcher",
+        "cmd": [sys.executable, str(ROOT_DIR / "services" / "ghost-mirror" / "docker_sandbox.py")],
+        "subsystem": "Ghost-Mirror Deception"
+    },
 ]
 
 def check_live_endpoints():
@@ -93,6 +108,7 @@ def check_live_endpoints():
         ("Gatekeeper Permissions", "http://127.0.0.1:8500/api/permissions"),
         ("SOC Provenance Graph", "http://127.0.0.1:8500/api/soc/provenance"),
         ("SOC 3D Console UI", "http://127.0.0.1:8500/soc"),
+        ("SOC 2D React Flow UI", "http://127.0.0.1:8500/soc/flow"),
     ]
     results = []
     for name, url in endpoints:

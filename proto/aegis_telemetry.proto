@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package aegis.telemetry.v1;
+
+option go_package = "github.com/manishpatil2005/aegiskernel/proto/v1;aegisv1";
+option java_package = "io.aegiskernel.telemetry.v1";
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_PROCESS_EXEC = 1;
+  EVENT_TYPE_PROCESS_EXIT = 2;
+  EVENT_TYPE_FILE_MPROTECT = 3;
+  EVENT_TYPE_SECURITY_FILE_OPEN = 4;
+  EVENT_TYPE_SYS_ENTER_CONNECT = 5;
+  EVENT_TYPE_CREDENTIAL_CHANGE = 6;
+  EVENT_TYPE_GHOST_SHUNT_TRIGGER = 7;
+}
+
+enum EdgeRelation {
+  EDGE_RELATION_UNSPECIFIED = 0;
+  EDGE_RELATION_SPAWNED = 1;
+  EDGE_RELATION_CONNECTED_TO = 2;
+  EDGE_RELATION_MODIFIED = 3;
+  EDGE_RELATION_INJECTED = 4;
+}
+
+message ProcessNode {
+  uint32 pid = 1;
+  uint32 ppid = 2;
+  uint32 uid = 3;
+  uint32 gid = 4;
+  string comm = 5;
+  string executable_path = 6;
+  string command_line = 7;
+  string sha256_hash = 8;
+  bool is_root = 9;
+  bool is_containerized = 10;
+}
+
+message SocketNode {
+  string source_ip = 1;
+  uint32 source_port = 2;
+  string destination_ip = 3;
+  uint32 destination_port = 4;
+  string protocol = 5;
+  int32 socket_family = 6;
+}
+
+message FileNode {
+  string file_path = 1;
+  uint64 inode = 2;
+  uint32 device_id = 3;
+  uint32 permissions = 4;
+  bool is_honey_token = 5;
+}
+
+message RawKernelEvent {
+  uint64 event_id = 1;
+  uint64 timestamp_ns = 2;
+  EventType event_type = 3;
+  EdgeRelation relation = 4;
+  ProcessNode process = 5;
+  SocketNode socket = 6;
+  FileNode file = 7;
+  uint32 cpu_core = 8;
+  int32 return_code = 9;
+}
+
+message TelemetryStreamRequest {
+  string host_id = 1;
+  string kernel_version = 2;
+  repeated RawKernelEvent events = 3;
+}
+
+message TelemetryStreamResponse {
+  bool acknowledged = 1;
+  uint64 last_processed_event_id = 2;
+  bool shunt_required = 3;
+  uint32 shunt_target_pid = 4;
+}
+
+service AegisTelemetryService {
+  rpc IngestTelemetryStream(stream TelemetryStreamRequest) returns (stream TelemetryStreamResponse);
+}

@@ -435,6 +435,14 @@ async def serve_soc_console():
             return f.read()
     return "<h1>AegisKernel SOC Console Initializing...</h1>"
 
+@app.get("/soc/flow", response_class=HTMLResponse)
+async def serve_react_flow_soc():
+    flow_file = STATIC_DIR / "react_flow_soc.html"
+    if flow_file.exists():
+        with open(flow_file, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>AegisKernel React Flow Console Initializing...</h1>"
+
 @app.get("/api/soc/provenance")
 async def get_soc_provenance():
     return JSONResponse({
