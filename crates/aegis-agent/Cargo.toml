@@ -18,3 +18,5 @@ tracing-subscriber = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 regex = "1.10"
+serde = { workspace = true }
+bincode = { workspace = true }

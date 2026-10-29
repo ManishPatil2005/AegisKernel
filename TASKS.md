@@ -57,16 +57,16 @@ Target Gate: USENIX Security / IEEE S&P Submission & Enterprise Pilot Readiness
 - [x] Update edge agent to handle memory protection, socket connections, and deception shunting
 
 ### Day 5: BPF Ring Buffer & Zero-Copy Userspace Reader
-- [ ] Initialize `BPF_MAP_TYPE_RINGBUF` with configurable buffer capacity (64 MB per host)
-- [ ] Implement Rust userspace ring-buffer consumer using `tokio` async workers
-- [ ] Implement zero-copy deserialization using Cap'n Proto / binary structs
-- [ ] Implement kernel drop counter monitoring (`dropped_events_total`)
+- [x] Initialize `BPF_MAP_TYPE_RINGBUF` with configurable buffer capacity (64 MB per host)
+- [x] Implement Rust userspace ring-buffer consumer using `tokio` async workers
+- [x] Implement zero-copy deserialization using Cap'n Proto / binary structs
+- [x] Implement kernel drop counter monitoring (`dropped_events_total`)
 
 ### Day 6: Edge Agent Deduplication & Telemetry Sanitization
-- [ ] Build in-memory process tree table in Rust agent (`pid` -> `ProcessContext`)
-- [ ] Implement command-line credential scrubber (regex-based masking of API keys, passwords)
-- [ ] Implement local backpressure buffer with NVMe write-ahead log (WAL) on network disconnect
-- [ ] Add Prometheus/OpenTelemetry metrics exporter for event rate and ring buffer saturation
+- [x] Build in-memory process tree table in Rust agent (`pid` -> `ProcessContext`)
+- [x] Implement command-line credential scrubber (regex-based masking of API keys, passwords)
+- [x] Implement local backpressure buffer with NVMe write-ahead log (WAL) on network disconnect
+- [x] Add Prometheus/OpenTelemetry metrics exporter for event rate and ring buffer saturation
 
 ### Day 7: Week 1 Integration & Kernel Matrix Verification
 - [ ] Execute continuous 24-hour stability stress test under Phoronix Linux compilation benchmark

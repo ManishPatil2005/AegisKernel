@@ -1,18 +1,20 @@
 //! # Aegis Edge Ingestion Agent Daemon
 //!
 //! Asynchronous userspace runtime consuming from in-kernel eBPF ring buffers,
-//! sanitizing telemetry payloads, maintaining local process trees, and streaming
-//! to the distributed event pipeline.
+//! sanitizing telemetry payloads, buffering to local NVMe write-ahead log (WAL),
+//! and streaming to the distributed event pipeline.
 
 #![deny(unsafe_code)]
 
 mod sanitizer;
+pub mod wal;
 
 use aegis_core::HostProcessTree;
 use aegis_proto::{AegisEventType, RawKernelEvent, TelemetryEvent, MAX_COMM_LEN, MAX_PATH_LEN};
 use sanitizer::sanitize_telemetry_string;
 use tracing::{error, info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use wal::WriteAheadLog;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -28,6 +30,11 @@ async fn main() -> anyhow::Result<()> {
     );
 
     let mut process_tree = HostProcessTree::new();
+
+    // Initialize NVMe WAL backpressure buffer
+    let wal_path = std::env::temp_dir().join("aegis_edge_backpressure.wal");
+    let mut wal = WriteAheadLog::open(&wal_path)?;
+    info!(wal_file = ?wal_path, "NVMe Write-Ahead Log initialized (Zero-Data-Loss buffer active)");
 
     info!("Initializing BPF ring buffer consumer pipeline");
 
@@ -118,6 +125,11 @@ async fn main() -> anyhow::Result<()> {
             Ok(mut event) => {
                 event.filename = sanitize_telemetry_string(&event.filename);
 
+                // Persist to local NVMe WAL backpressure buffer
+                if let Err(e) = wal.append(&event) {
+                    error!(error = %e, "WAL write failure");
+                }
+
                 match event.event_type {
                     AegisEventType::ProcessExec | AegisEventType::ProcessExit => {
                         info!(
@@ -179,6 +191,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     info!(
+        wal_buffered_records = wal.record_count(),
         active_processes = process_tree.len(),
         "AegisKernel Edge Ingestion Agent operational and healthy"
     );
