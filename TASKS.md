@@ -125,16 +125,16 @@ Target Gate: USENIX Security / IEEE S&P Submission & Enterprise Pilot Readiness
 ## WEEK 3: TEMPORAL GNN & NEURO-SYMBOLIC MULTI-AGENT SWARM (DAYS 15–21)
 
 ### Day 15: Continuous-Time Temporal GNN (CT-HTGN) Architecture
-- [ ] Build PyTorch Geometric / TensorRT streaming pipeline for continuous-time graph learning
-- [ ] Implement node memory updater with exponential continuous time decay ($\Delta t$)
-- [ ] Implement multi-head temporal attention message passing operator
-- [ ] Train baseline embedding model on DARPA TC (THEIA/CADETS) dataset
+- [x] Build PyTorch Geometric / TensorRT streaming pipeline for continuous-time graph learning
+- [x] Implement node memory updater with exponential continuous time decay ($\Delta t$)
+- [x] Implement multi-head temporal attention message passing operator
+- [x] Train baseline embedding model on DARPA TC (THEIA/CADETS) dataset
 
 ### Day 16: Anomaly Innovation Boundary & Model Serving
-- [ ] Build real-time scoring engine evaluating subgraph anomaly entropy ($\Delta \mathcal{H}$)
-- [ ] Deploy TensorRT model server with CUDA graph acceleration (< 5 ms per inference batch)
-- [ ] Implement CPU fallback inference worker for non-GPU enterprise deployments
-- [ ] Verify $F_1 > 95\%$ on offline DARPA TC holdout test set
+- [x] Build real-time scoring engine evaluating subgraph anomaly entropy ($\Delta \mathcal{H}$)
+- [x] Deploy TensorRT model server with CUDA graph acceleration (< 5 ms per inference batch)
+- [x] Implement CPU fallback inference worker for non-GPU enterprise deployments
+- [x] Verify $F_1 > 95\%$ on offline DARPA TC holdout test set
 
 ### Day 17: Multi-Agent AI Swarm Core Architecture
 - [ ] Implement Triaging Agent (Fast L1 triage using quantized local SLM / Llama-3-8B)
