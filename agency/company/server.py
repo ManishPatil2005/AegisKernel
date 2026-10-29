@@ -538,6 +538,28 @@ async def trigger_simulation():
         })
     return JSONResponse({"status": "script_not_found"}, status_code=500)
 
+@app.post("/api/soc/scenario/{scenario_id}")
+async def trigger_scenario(scenario_id: str):
+    """Executes a specific APT scenario (apt29, blackcat, lazarus) via the AttackPlaybookEngine."""
+    try:
+        sys.path.append(str(BASE_DIR.parent))
+        from services.simulations.scenario_engine import AttackPlaybookEngine
+        res = AttackPlaybookEngine.execute_scenario(scenario_id)
+        
+        company_state["total_tasks_completed"] += 1
+        company_state["invariants_verified"] += len(res.get("stages_executed", []))
+        activity_logs.insert(0, {
+            "timestamp": time.strftime("%H:%M:%S"),
+            "agent": "Autonomous Threat-Hunting Directorate",
+            "division": "security",
+            "message": f"PLAYBOOK SIMULATED [{res['title']}]: All {res['total_stages']} attack stages formally trapped and deflected into Ghost-Mirror CoW buffers.",
+            "status": "success"
+        })
+        return JSONResponse(res)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
 @app.post("/api/cli/exec")
 async def execute_cli_command(req: Request):
     """Executes aegisctl operator commands from the web console."""
