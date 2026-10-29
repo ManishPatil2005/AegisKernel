@@ -56,3 +56,33 @@ Status Options: Proposed, Accepted, Superseded, Deprecated
 *   **Consequences:**
     *   *Positive:* Provable architectural immunity against indirect prompt injection via telemetry streams.
     *   *Negative:* The LLM cannot leverage textual nuances in arbitrary file names; mitigated by edge agent regex feature extraction.
+
+---
+
+## ADR-0006: Selection of Redpanda over Apache Kafka for Distributed Streaming Backbone
+*   **Status:** **ACCEPTED** (User Aligned)
+*   **Context:** The telemetry pipeline must handle $> 100,000$ kernel events per second per node with sub-millisecond p99 latency without JVM garbage-collection pauses.
+*   **Decision:** Mandate **Redpanda** as the primary distributed streaming broker, utilizing standard Kafka client protocols.
+*   **Consequences:**
+    *   *Positive:* Built entirely in modern C++ with the Seastar asynchronous engine; eliminates JVM memory overhead; up to $10\times$ lower tail latency; zero ZooKeeper/KRaft complexity; drops hardware costs by $60\%$.
+    *   *Negative:* Slightly newer ecosystem than 12-year-old Apache Kafka; fully mitigated by 100% Kafka API wire compatibility.
+
+---
+
+## ADR-0007: Selection of Memgraph over Neo4j for Causal Provenance Graph Engine
+*   **Status:** **ACCEPTED** (User Aligned)
+*   **Context:** Provenance-based attack detection requires real-time graph updates and continuous temporal sub-graph extractions on streaming kernel events.
+*   **Decision:** Deploy **Memgraph** as the hot in-memory graph engine with Cypher query language support.
+*   **Consequences:**
+    *   *Positive:* In-memory C++ execution enables microsecond graph inserts; native Kafka/Redpanda streaming consumers; open-source Cypher query standard; seamless integration with PyTorch Geometric graph embeddings.
+    *   *Negative:* In-memory storage bounds active hot graph retention to rolling 7-day windows; mitigated by cold-tier Parquet archiving to S3/MinIO.
+
+---
+
+## ADR-0008: Selection of Hybrid Cloud-Native Kubernetes Deployment Topology
+*   **Status:** **ACCEPTED** (User Aligned)
+*   **Context:** Target enterprise SOCs deploy across heterogeneous environments, including AWS EKS, GCP GKE, and air-gapped on-premises bare-metal Linux servers.
+*   **Decision:** Architect the deployment layer as a **Cloud-Native Helm Chart & Kubernetes Operator** supporting multi-cloud and bare-metal targets.
+*   **Consequences:**
+    *   *Positive:* Unified declarative deployment using Kubernetes primitives; zero cloud vendor lock-in; supports air-gapped defense networks.
+    *   *Negative:* Requires managing container networking (CNI) and storage (CSI) across varied clouds; mitigated by standard Helm abstraction.

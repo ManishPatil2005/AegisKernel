@@ -79,16 +79,16 @@ Target Gate: USENIX Security / IEEE S&P Submission & Enterprise Pilot Readiness
 ## WEEK 2: EVENT STREAMING, CAUSAL PROVENANCE & GRAPH ENGINE (DAYS 8–14)
 
 ### Day 8: Distributed Event Backbone (Redpanda / Kafka Topology)
-- [ ] Deploy Redpanda / Kafka cluster with TLS 1.3 encryption and SASL/SCRAM authentication
-- [ ] Define Protobuf / Avro schemas for `ProcessEvent`, `FileEvent`, `NetworkEvent`
-- [ ] Implement partition keying strategy keyed by `(tenant_id, host_uuid)`
-- [ ] Benchmark ingestion throughput (> 100,000 events/sec per broker partition)
+- [x] Deploy Redpanda / Kafka cluster with TLS 1.3 encryption and SASL/SCRAM authentication
+- [x] Define Protobuf / Avro schemas for `ProcessEvent`, `FileEvent`, `NetworkEvent`
+- [x] Implement partition keying strategy keyed by `(tenant_id, host_uuid)`
+- [x] Benchmark ingestion throughput (> 100,000 events/sec per broker partition)
 
 ### Day 9: In-Memory Temporal Graph Schema & Ingestion Pipeline
-- [ ] Deploy distributed in-memory graph engine (Memgraph / Rust petgraph cluster)
-- [ ] Define heterogeneous graph schema: Vertices (`Process`, `File`, `Socket`, `User`)
-- [ ] Define directed causal edges (`FORKED`, `EXECUTED`, `WROTE`, `CONNECTED_TO`) with timestamps
-- [ ] Implement batch streaming consumer group from Kafka to Graph Engine
+- [x] Deploy distributed in-memory graph engine (Memgraph / Rust petgraph cluster)
+- [x] Define heterogeneous graph schema: Vertices (`Process`, `File`, `Socket`, `User`)
+- [x] Define directed causal edges (`FORKED`, `EXECUTED`, `WROTE`, `CONNECTED_TO`) with timestamps
+- [x] Implement batch streaming consumer group from Kafka to Graph Engine
 
 ### Day 10: Streaming Graph Reduction & Cycle Elimination
 - [ ] Implement in-memory edge aggregation to collapse repeated syscall loops

@@ -1,0 +1,63 @@
+version: "3.8"
+
+networks:
+  aegis-net:
+    driver: bridge
+
+volumes:
+  redpanda-data:
+  memgraph-data:
+
+services:
+  # 1. Distributed Streaming Backbone: Redpanda (Kafka Wire-Compatible)
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.2
+    container_name: aegis-redpanda
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --overprovisioned
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    networks:
+      - aegis-net
+
+  # 2. In-Memory Causal Provenance Graph Engine: Memgraph MAGE
+  memgraph:
+    image: memgraph/memgraph-mage:latest
+    container_name: aegis-memgraph
+    ports:
+      - "7687:7687" # Bolt protocol
+      - "3000:3000" # Memgraph Lab Web UI
+    environment:
+      - MEMGRAPH="--log-level=WARNING --memory-limit=4096"
+    volumes:
+      - memgraph-data:/var/lib/memgraph
+    networks:
+      - aegis-net
+
+  # 3. Aegis Agency Company Orchestrator & Live Monitoring Dashboard
+  aegis-agency:
+    build:
+      context: ../
+      dockerfile: agency/Dockerfile
+    container_name: aegis-agency-dashboard
+    ports:
+      - "8500:8500"
+    environment:
+      - REDPANDA_BROKERS=redpanda:29092
+      - MEMGRAPH_URI=bolt://memgraph:7687
+    depends_on:
+      - redpanda
+      - memgraph
+    networks:
+      - aegis-net
