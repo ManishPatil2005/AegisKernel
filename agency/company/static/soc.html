@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisKernel: 3D Hardware-Accelerated SOC Threat Hunting Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap');
+    body { font-family: 'JetBrains Mono', monospace; background-color: #05070c; }
+    .glow-cyan { text-shadow: 0 0 10px rgba(6, 182, 212, 0.7); }
+    .glow-red { text-shadow: 0 0 10px rgba(244, 63, 94, 0.8); }
+    .glow-purple { text-shadow: 0 0 10px rgba(168, 85, 247, 0.8); }
+    #canvas-container canvas { display: block; outline: none; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="text-slate-300 h-screen w-screen flex flex-col overflow-hidden select-none">
+
+  <!-- Top Navigation Header -->
+  <header class="h-14 bg-[#090d16] border-b border-slate-800/80 px-6 flex items-center justify-between z-30 shadow-lg">
+    <div class="flex items-center gap-4">
+      <div class="h-9 w-9 rounded-lg bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-lg text-emerald-400">
+        🛡️
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-extrabold tracking-wider text-white">AEGISKERNEL</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">SOC CONSOLE v1.2</span>
+        </div>
+        <p class="text-[10px] text-slate-500">Autonomous Kernel Threat Hunting & Causal Provenance</p>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Badges -->
+    <div class="flex items-center gap-4 text-xs">
+      <div class="flex items-center gap-2 bg-[#0e1424] px-3 py-1.5 rounded-md border border-slate-800">
+        <span class="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
+        <span class="text-slate-400">Threat Status:</span>
+        <span class="text-rose-400 font-bold">ACTIVE BREACH CONTAINED</span>
+      </div>
+      <div class="flex items-center gap-2 bg-[#0e1424] px-3 py-1.5 rounded-md border border-slate-800">
+        <span class="text-slate-400">Ghost-Mirror Shunts:</span>
+        <span class="text-purple-400 font-bold">1 Active</span>
+      </div>
+      <div class="flex items-center gap-2 bg-[#0e1424] px-3 py-1.5 rounded-md border border-slate-800">
+        <span class="text-slate-400">Max R_blast:</span>
+        <span class="text-amber-400 font-bold">32.88 (CRITICAL)</span>
+      </div>
+      <div class="flex items-center gap-2 bg-[#0e1424] px-3 py-1.5 rounded-md border border-slate-800">
+        <span class="text-slate-400">BPF Drop Rate:</span>
+        <span class="text-emerald-400 font-bold">0.00%</span>
+      </div>
+      <a href="/" class="px-3 py-1.5 bg-[#141d2e] hover:bg-[#1e2c45] text-cyan-400 hover:text-white rounded text-xs font-semibold border border-cyan-500/30 transition flex items-center gap-1.5">
+        <span>👥</span> Agency Dashboard (8500)
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Viewport Layout -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- Left Panel: MITRE Heatmap & Reasoning Tree -->
+    <aside class="w-80 bg-[#080c14] border-r border-slate-800/80 flex flex-col z-20">
+      
+      <!-- MITRE ATT&CK Matrix Mini Heat-Map -->
+      <div class="p-4 border-b border-slate-800/80">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+            <span>🎯</span> MITRE ATT&CK Matrix
+          </h2>
+          <span class="text-[10px] text-rose-400 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">4 TECHNIQUES</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[10px]">
+          <div class="p-2 rounded bg-rose-500/10 border border-rose-500/30">
+            <div class="text-slate-400">Execution</div>
+            <div class="font-bold text-rose-300">T1059.004 (sh)</div>
+            <div class="text-[9px] text-slate-500">Hit Count: 14</div>
+          </div>
+          <div class="p-2 rounded bg-rose-500/10 border border-rose-500/30">
+            <div class="text-slate-400">Defense Evasion</div>
+            <div class="font-bold text-rose-300">T1055 (mprotect)</div>
+            <div class="text-[9px] text-slate-500">PROT_EXEC Trapped</div>
+          </div>
+          <div class="p-2 rounded bg-amber-500/10 border border-amber-500/30">
+            <div class="text-slate-400">Command & Control</div>
+            <div class="font-bold text-amber-300">T1071 (C2 Socket)</div>
+            <div class="text-[9px] text-slate-500">198.51.100.4:4444</div>
+          </div>
+          <div class="p-2 rounded bg-purple-500/10 border border-purple-500/30">
+            <div class="text-slate-400">Credential Access</div>
+            <div class="font-bold text-purple-300">T1003 (Canary)</div>
+            <div class="text-[9px] text-slate-500">Ghost Trap Tripped</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neuro-Symbolic Agent Reasoning Tree -->
+      <div class="p-4 flex-1 overflow-y-auto">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-1.5">
+          <span>📐</span> Neuro-Symbolic Proof Tree
+        </h2>
+        <div class="space-y-3 text-xs">
+          <!-- Step 1 -->
+          <div class="p-2.5 rounded-lg bg-[#0e1422] border border-slate-800">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-cyan-400 font-bold">1. L1 Fast Triage</span>
+              <span class="text-[10px] text-emerald-400 font-semibold">PASS (0.984)</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Anomaly detected on PID 4096. Shannon entropy exceeds threshold (0.91 &gt; 0.70).</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="p-2.5 rounded-lg bg-[#0e1422] border border-slate-800">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-cyan-400 font-bold">2. Causal Path Hunter</span>
+              <span class="text-[10px] text-emerald-400 font-semibold">TRAVERSED</span>
+            </div>
+            <p class="text-[11px] text-slate-400">3-hop ancestry resolved: PID 1024 (nginx) -&gt; PID 2048 (sh) -&gt; PID 4096 (c2_revshell).</p>
+          </div>
+
+          <!-- Step 3: Z3 SMT Solver -->
+          <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-emerald-300 font-bold">3. Z3 SMT Formal Proof</span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-bold">VERIFIED</span>
+            </div>
+            <code class="block text-[10px] bg-[#070b12] p-2 rounded text-emerald-400 font-mono mt-1 overflow-x-auto">
+              reach(4096, CrownJewel) = False<br>
+              contain(4096) = SAT<br>
+              invariant_safe = True
+            </code>
+          </div>
+
+          <!-- Step 4: Ghost-Mirror Shunting -->
+          <div class="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/30">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-purple-300 font-bold">4. Ghost-Mirror Shunt</span>
+              <span class="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Transparent CoW memory redirection engaged. Attacker trapped in synthetic scratchpad.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Desk -->
+      <div class="p-4 border-t border-slate-800/80 bg-[#090d16]">
+        <button id="btn-shunt" class="w-full py-2 mb-2 bg-purple-600 hover:bg-purple-500 text-white rounded font-bold text-xs shadow-lg shadow-purple-900/30 transition flex items-center justify-center gap-2">
+          <span>🪞</span> Shunt PID 4096 (CoW Mirror)
+        </button>
+        <button id="btn-terminate" class="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white rounded font-bold text-xs shadow-lg shadow-rose-900/30 transition flex items-center justify-center gap-2">
+          <span>⚡</span> Terminate Exploit Path
+        </button>
+      </div>
+    </aside>
+
+    <!-- Center Canvas: 3D Hardware Accelerated Causal Graph -->
+    <div class="flex-1 flex flex-col relative bg-[#04060a]">
+      <div id="canvas-container" class="flex-1 relative cursor-grab active:cursor-grabbing">
+        
+        <!-- Canvas Overlay Controls HUD -->
+        <div class="absolute top-4 left-4 z-10 flex gap-2">
+          <button id="btn-reset-view" class="px-3 py-1 bg-[#0b101c]/80 backdrop-blur border border-slate-700/70 text-slate-300 hover:text-white rounded text-xs font-semibold hover:border-cyan-500 transition">
+            Reset 3D Orbit
+          </button>
+          <button id="btn-toggle-labels" class="px-3 py-1 bg-[#0b101c]/80 backdrop-blur border border-slate-700/70 text-slate-300 hover:text-white rounded text-xs font-semibold hover:border-cyan-500 transition">
+            Toggle Node HUD
+          </button>
+        </div>
+
+        <!-- Legend HUD -->
+        <div class="absolute top-4 right-4 z-10 bg-[#0b101c]/90 backdrop-blur border border-slate-800 p-3 rounded-lg text-xs space-y-1.5 shadow-2xl">
+          <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Graph Legend</div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></span>
+            <span>Benign Kernel Root / Crown Jewel</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+            <span>Benign Workload (nginx, postgres)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></span>
+            <span>Suspicious Ingress / Injection</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-purple-400 shadow-sm shadow-purple-400/50"></span>
+            <span>Ghost-Mirror Shunted (CoW Scratchpad)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+            <span>Exploit Node (C2 Socket / Rootkit)</span>
+          </div>
+        </div>
+
+        <!-- Selected Node Inspector Card -->
+        <div id="inspector-card" class="absolute bottom-20 left-4 z-10 max-w-sm bg-[#0b101c]/95 backdrop-blur border border-slate-800 p-4 rounded-xl shadow-2xl transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span id="card-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">CRITICAL THREAT</span>
+              <h3 id="card-title" class="font-bold text-white text-xs">PID 4096 (curl_revshell)</h3>
+            </div>
+          </div>
+          <div class="space-y-1 text-xs text-slate-400">
+            <p>Binary Path: <code id="card-path" class="text-slate-200">/tmp/.x11-unix/reverse_tcp</code></p>
+            <p>Ancestor: <code id="card-parent" class="text-slate-200">PID 1024 (nginx: worker process)</code></p>
+            <p>Blast Radius: <strong id="card-blast" class="text-amber-400">32.88</strong></p>
+            <p>CT-HTGN Score: <strong id="card-anomaly" class="text-rose-400">0.984 (High Anomaly)</strong></p>
+            <p>Ghost-Mirror State: <strong id="card-ghost" class="text-purple-400">Trapped in 4MB CoW Scratchpad</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Replay Slider Bar -->
+      <div class="h-16 bg-[#090d16] border-t border-slate-800/80 px-6 flex items-center justify-between z-20">
+        <div class="flex items-center gap-3">
+          <button id="btn-play-replay" class="h-8 px-3 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition">
+            <span id="play-icon">▶</span> Replay Attack
+          </button>
+          <button id="btn-step-back" class="h-8 px-2 rounded bg-[#141d2e] hover:bg-[#1e2c45] text-slate-300 text-xs">⏮</button>
+          <button id="btn-step-forward" class="h-8 px-2 rounded bg-[#141d2e] hover:bg-[#1e2c45] text-slate-300 text-xs">⏭</button>
+        </div>
+
+        <div class="flex-1 max-w-2xl mx-8 flex items-center gap-4">
+          <span class="text-xs text-slate-400 font-semibold whitespace-nowrap">Timeline (0ms - 10ms):</span>
+          <input id="timeline-slider" type="range" min="0" max="100" value="100" class="w-full h-1.5 bg-[#141e30] rounded-lg appearance-none cursor-pointer accent-emerald-500">
+          <span id="timeline-label" class="text-xs text-emerald-400 font-bold w-14 text-right">10.0 ms</span>
+        </div>
+
+        <div class="text-xs text-slate-400">
+          Attacking IP: <strong class="text-rose-400">198.51.100.4</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js 3D Graph Implementation Script -->
+  <script>
+    const container = document.getElementById('canvas-container');
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    // 1. Three.js Scene Setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x05070c);
+    scene.fog = new THREE.FogExp2(0x05070c, 0.003);
+
+    const camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
+    camera.position.set(0, 50, 220);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // Grid Floor
+    const grid = new THREE.GridHelper(500, 50, 0x1e293b, 0x0f172a);
+    grid.position.y = -60;
+    scene.add(grid);
+
+    // Ambient and Point Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0x06b6d4, 2, 500);
+    pointLight.position.set(50, 100, 100);
+    scene.add(pointLight);
+
+    // 2. Causal Provenance Nodes Data
+    const graphNodes = [
+      { id: 1, name: "systemd (PID 1)", type: "crown", color: 0x06b6d4, x: -120, y: 0, z: 0, size: 7, blast: 0.1, anomaly: 0.01, path: "/usr/lib/systemd/systemd" },
+      { id: 2, name: "nginx: master (PID 900)", type: "workload", color: 0x10b981, x: -60, y: 20, z: -20, size: 5, blast: 1.2, anomaly: 0.05, path: "/usr/sbin/nginx" },
+      { id: 3, name: "nginx: worker (PID 1024)", type: "compromised", color: 0xf59e0b, x: 0, y: 15, z: 0, size: 5.5, blast: 8.5, anomaly: 0.65, path: "/usr/sbin/nginx" },
+      { id: 4, name: "sh: exploit wrapper (PID 2048)", type: "injection", color: 0xf43f5e, x: 50, y: -10, z: 20, size: 6, blast: 19.4, anomaly: 0.89, path: "/bin/sh" },
+      { id: 5, name: "curl_revshell (PID 4096)", type: "c2", color: 0xa855f7, x: 110, y: 30, z: 40, size: 7.5, blast: 32.88, anomaly: 0.984, path: "/tmp/.x11-unix/reverse_tcp" },
+      { id: 6, name: "postgres (PID 800)", type: "crown", color: 0x06b6d4, x: -80, y: -30, z: -50, size: 6, blast: 0.5, anomaly: 0.02, path: "/usr/lib/postgresql/bin/postgres" },
+      { id: 7, name: "Canary: /etc/shadow (Honey)", type: "canary", color: 0xd946ef, x: 140, y: -20, z: 10, size: 5, blast: 25.0, anomaly: 0.95, path: "/etc/shadow (Canary Trap)" },
+    ];
+
+    const graphEdges = [
+      { from: 1, to: 2, label: "FORK" },
+      { from: 1, to: 6, label: "FORK" },
+      { from: 2, to: 3, label: "CLONE" },
+      { from: 3, to: 4, label: "EXEC (T1059)" },
+      { from: 4, to: 5, label: "PROT_EXEC + CONNECT" },
+      { from: 5, to: 7, label: "TRAPPED READ" },
+    ];
+
+    // 3. Render 3D Spheres & Edge Beams
+    const nodeMeshes = [];
+    const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
+
+    graphNodes.forEach(node => {
+      const mat = new THREE.MeshStandardMaterial({
+        color: node.color,
+        emissive: node.color,
+        emissiveIntensity: 0.4,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+      const mesh = new THREE.Mesh(sphereGeo, mat);
+      mesh.scale.set(node.size, node.size, node.size);
+      mesh.position.set(node.x, node.y, node.z);
+      mesh.userData = node;
+      scene.add(mesh);
+      nodeMeshes.push(mesh);
+
+      // Add Orbit Halo Ring for Exploit / Shunted nodes
+      if (node.type === "c2" || node.type === "injection") {
+        const ringGeo = new THREE.RingGeometry(node.size * 1.3, node.size * 1.5, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: node.color, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        mesh.add(ring);
+      }
+    });
+
+    // Render Directed Edges
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.6 });
+    graphEdges.forEach(edge => {
+      const nFrom = graphNodes.find(n => n.id === edge.from);
+      const nTo = graphNodes.find(n => n.id === edge.to);
+      if (nFrom && nTo) {
+        const points = [
+          new THREE.Vector3(nFrom.x, nFrom.y, nFrom.z),
+          new THREE.Vector3(nTo.x, nTo.y, nTo.z)
+        ];
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(lineGeo, lineMat);
+        scene.add(line);
+      }
+    });
+
+    // 4. Mouse Orbit & Interaction Controls
+    let isDragging = false;
+    let prevMousePos = { x: 0, y: 0 };
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+
+    container.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      prevMousePos = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    container.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaX = e.clientX - prevMousePos.x;
+        const deltaY = e.clientY - prevMousePos.y;
+        scene.rotation.y += deltaX * 0.005;
+        scene.rotation.x += deltaY * 0.005;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    // Zoom on wheel
+    container.addEventListener('wheel', (e) => {
+      camera.position.z += e.deltaY * 0.1;
+      camera.position.z = Math.max(80, Math.min(500, camera.position.z));
+    });
+
+    // Raycaster for Node Clicking
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    container.addEventListener('click', (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(nodeMeshes);
+
+      if (intersects.length > 0) {
+        const node = intersects[0].object.userData;
+        updateInspectorCard(node);
+      }
+    });
+
+    function updateInspectorCard(node) {
+      document.getElementById('card-title').innerText = node.name;
+      document.getElementById('card-path').innerText = node.path;
+      document.getElementById('card-blast').innerText = node.blast.toFixed(2);
+      document.getElementById('card-anomaly').innerText = (node.anomaly * 100).toFixed(1) + "% (" + (node.anomaly > 0.8 ? "CRITICAL" : "NORMAL") + ")";
+      
+      const badge = document.getElementById('card-badge');
+      if (node.blast > 20) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40";
+        badge.innerText = "CRITICAL THREAT";
+      } else if (node.blast > 5) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40";
+        badge.innerText = "SUSPICIOUS";
+      } else {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+        badge.innerText = "BENIGN / PROTECTED";
+      }
+    }
+
+    // 5. Animation Loop
+    let angle = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      angle += 0.01;
+
+      // Subtle float animation
+      nodeMeshes.forEach((mesh, idx) => {
+        mesh.position.y += Math.sin(angle + idx) * 0.05;
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Reset View Button
+    document.getElementById('btn-reset-view').addEventListener('click', () => {
+      scene.rotation.set(0, 0, 0);
+      camera.position.set(0, 50, 220);
+    });
+
+    // Replay Slider Integration
+    const slider = document.getElementById('timeline-slider');
+    const label = document.getElementById('timeline-label');
+    slider.addEventListener('input', (e) => {
+      const val = e.target.value;
+      label.innerText = (val * 0.1).toFixed(1) + " ms";
+      // Fade nodes according to timeline
+      const activeCount = Math.ceil((val / 100) * nodeMeshes.length);
+      nodeMeshes.forEach((mesh, i) => {
+        mesh.visible = (i < activeCount);
+      });
+    });
+
+    let isPlaying = false;
+    let replayInterval = null;
+    document.getElementById('btn-play-replay').addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      const playIcon = document.getElementById('play-icon');
+      if (isPlaying) {
+        playIcon.innerText = "⏸";
+        slider.value = 0;
+        replayInterval = setInterval(() => {
+          if (parseInt(slider.value) >= 100) {
+            clearInterval(replayInterval);
+            isPlaying = false;
+            playIcon.innerText = "▶";
+          } else {
+            slider.value = parseInt(slider.value) + 2;
+            slider.dispatchEvent(new Event('input'));
+          }
+        }, 80);
+      } else {
+        playIcon.innerText = "▶";
+        clearInterval(replayInterval);
+      }
+    });
+
+    // Quick Actions
+    document.getElementById('btn-shunt').addEventListener('click', () => {
+      alert("Ghost-Mirror Command Executed: PID 4096 successfully locked into in-kernel CoW Memory Scratchpad!");
+    });
+
+    document.getElementById('btn-terminate').addEventListener('click', () => {
+      alert("Containment Directive Sent: PID 4096 and causal lineage terminated via BPF-LSM SIGKILL.");
+    });
+
+    window.addEventListener('resize', () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+  </script>
+</body>
+</html>

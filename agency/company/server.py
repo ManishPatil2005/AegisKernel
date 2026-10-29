@@ -426,5 +426,41 @@ async def serve_dashboard():
             return f.read()
     return "<h1>AegisKernel Agency Dashboard Initializing...</h1>"
 
+@app.get("/soc", response_class=HTMLResponse)
+async def serve_soc_console():
+    soc_file = STATIC_DIR / "soc.html"
+    if soc_file.exists():
+        with open(soc_file, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>AegisKernel SOC Console Initializing...</h1>"
+
+@app.get("/api/soc/provenance")
+async def get_soc_provenance():
+    return JSONResponse({
+        "status": "active_threat",
+        "host": "prod-k8s-node-04.sec",
+        "kernel": "Linux 6.6.0-aegis",
+        "nodes": [
+            {"id": 1, "name": "systemd (PID 1)", "type": "crown_jewel", "blast_radius": 0.1, "anomaly": 0.01},
+            {"id": 2, "name": "nginx: master (PID 900)", "type": "workload", "blast_radius": 1.2, "anomaly": 0.05},
+            {"id": 3, "name": "nginx: worker (PID 1024)", "type": "compromised", "blast_radius": 8.5, "anomaly": 0.65},
+            {"id": 4, "name": "sh: exploit wrapper (PID 2048)", "type": "injection", "blast_radius": 19.4, "anomaly": 0.89},
+            {"id": 5, "name": "curl_revshell (PID 4096)", "type": "c2_socket", "blast_radius": 32.88, "anomaly": 0.984},
+            {"id": 6, "name": "postgres (PID 800)", "type": "crown_jewel", "blast_radius": 0.5, "anomaly": 0.02},
+            {"id": 7, "name": "Canary: /etc/shadow", "type": "honey_token", "blast_radius": 25.0, "anomaly": 0.95}
+        ],
+        "edges": [
+            {"from": 1, "to": 2, "type": "FORK"},
+            {"from": 1, "to": 6, "type": "FORK"},
+            {"from": 2, "to": 3, "type": "CLONE"},
+            {"from": 3, "to": 4, "type": "EXEC_T1059"},
+            {"from": 4, "to": 5, "type": "PROT_EXEC_CONNECT"},
+            {"from": 5, "to": 7, "type": "TRAPPED_READ"}
+        ],
+        "mitre_techniques": ["T1059.004", "T1055", "T1071.001", "T1003"],
+        "fol_proof_verified": True,
+        "shunted_pid": 4096
+    })
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8500, log_level="info")
