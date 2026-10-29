@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AegisKernel Agency | Company Operations & Agent Swarm Command</title>
+    <title>AegisKernel Agency | Company Operations & Permission Gate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,6 +11,7 @@
         .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
         .glow-cyan { box-shadow: 0 0 20px rgba(6, 182, 212, 0.25); }
         .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); }
+        .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
         .terminal-scroll::-webkit-scrollbar { width: 6px; }
         .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
@@ -55,23 +56,23 @@
                 <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Total Hired Workforce</div>
                 <div id="stat-total-agents" class="text-3xl font-extrabold text-white mt-1">--</div>
                 <div class="text-xs text-cyan-400 mt-2 flex items-center gap-1">
-                    <i class="fa-solid fa-users"></i> Across 18 Divisions
+                    <i class="fa-solid fa-users"></i> Across 29 Divisions
                 </div>
             </div>
 
             <div class="glass-panel p-4 rounded-xl border border-cyan-800/40 glow-cyan relative overflow-hidden">
                 <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Aegis Specialists</div>
-                <div id="stat-specialists" class="text-3xl font-extrabold text-cyan-400 mt-1">6</div>
+                <div id="stat-specialists" class="text-3xl font-extrabold text-cyan-400 mt-1">7</div>
                 <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                    <i class="fa-solid fa-star text-amber-400"></i> Core Project Leads
+                    <i class="fa-solid fa-star text-amber-400"></i> Includes Permission Gatekeeper
                 </div>
             </div>
 
-            <div class="glass-panel p-4 rounded-xl border border-slate-800 relative overflow-hidden">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Active Missions</div>
-                <div id="stat-active-missions" class="text-3xl font-extrabold text-white mt-1">--</div>
-                <div class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
-                    <i class="fa-solid fa-bolt"></i> Sprint 1 in Progress
+            <div class="glass-panel p-4 rounded-xl border border-emerald-800/40 glow-emerald relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Permissions Granted (YES)</div>
+                <div id="stat-permissions-granted" class="text-3xl font-extrabold text-emerald-400 mt-1">--</div>
+                <div class="text-xs text-emerald-300 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-key"></i> Dual-Quorum Verified
                 </div>
             </div>
 
@@ -87,13 +88,39 @@
                 <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Company Uptime</div>
                 <div id="stat-uptime" class="text-3xl font-extrabold text-emerald-400 mt-1">--</div>
                 <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                    <i class="fa-solid fa-circle-check text-emerald-400"></i> 100% Operational
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i> Never-Stop Architecture
                 </div>
             </div>
         </div>
 
+        <!-- NEW: Dedicated Permission Gatekeeper Authorization Desk -->
+        <div class="glass-panel rounded-2xl border border-amber-500/40 p-5 space-y-4 glow-purple">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-xl">
+                        🔑
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            PERMISSION & ACCESS AUTHORIZATION DESK
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-400 border border-amber-800 uppercase font-mono">Agent Active: Chief Permission Gatekeeper</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Zero-Trust Dual Authorization Gate: The Gatekeeper evaluates SMT reachability proofs and issues "YES / ACCESS GRANTED" or "DENIED".</p>
+                    </div>
+                </div>
+                <button onclick="fetchPermissions()" class="text-xs text-slate-400 hover:text-white font-mono flex items-center gap-1">
+                    <i class="fa-solid fa-rotate"></i> Refresh Queue
+                </button>
+            </div>
+
+            <!-- Permission Tickets Queue -->
+            <div id="permissions-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Dynamically populated via JavaScript -->
+            </div>
+        </div>
+
         <!-- Division Filtering Bar -->
-        <div class="flex items-center justify-between pb-2">
+        <div class="flex items-center justify-between pb-2 pt-2">
             <div class="flex items-center space-x-2 overflow-x-auto py-1">
                 <button onclick="filterDivision('all')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-600 text-white transition" data-div="all">All Divisions</button>
                 <button onclick="filterDivision('security')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-div="security">Security Squad</button>
@@ -129,7 +156,7 @@
                 </div>
 
                 <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500 font-mono">
-                    <span>Aegis Swarm Protocol v1.0.0</span>
+                    <span>Aegis Swarm Protocol v1.1.0</span>
                     <button onclick="clearTerminal()" class="hover:text-slate-300">Clear Feed</button>
                 </div>
             </div>
@@ -235,9 +262,76 @@
                 document.getElementById('stat-specialists').innerText = data.hired_specialists;
                 document.getElementById('stat-active-missions').innerText = data.active_missions;
                 document.getElementById('stat-invariants').innerText = data.invariants_verified;
+                document.getElementById('stat-permissions-granted').innerText = data.permissions_granted;
                 document.getElementById('stat-uptime').innerText = data.uptime;
             } catch (e) {
                 console.error("Stats fetch error:", e);
+            }
+        }
+
+        async function fetchPermissions() {
+            try {
+                const res = await fetch('/api/permissions');
+                const perms = await res.json();
+                const container = document.getElementById('permissions-container');
+
+                container.innerHTML = perms.map(p => {
+                    const isPending = p.status === 'PENDING';
+                    const statusBadge = isPending
+                        ? '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 font-mono font-bold animate-pulse">PENDING APPROVAL</span>'
+                        : (p.status === 'APPROVED' 
+                            ? '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono font-bold">ACCESS GRANTED (YES)</span>'
+                            : '<span class="text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800 font-mono font-bold">ACCESS DENIED</span>');
+
+                    const actionButtons = isPending ? `
+                        <div class="flex items-center space-x-2 mt-3 pt-3 border-t border-slate-800">
+                            <button onclick="decidePermission('${p.id}', 'APPROVE')" class="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-check"></i> SAY YES (GRANT)
+                            </button>
+                            <button onclick="decidePermission('${p.id}', 'DENY')" class="py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-400 font-bold text-xs transition border border-slate-700">
+                                DENY
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="mt-3 pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 font-mono flex items-center justify-between">
+                            <span>Decision Finalized</span>
+                            <span class="text-slate-400">${p.timestamp}</span>
+                        </div>
+                    `;
+
+                    return `
+                        <div class="glass-panel p-4 rounded-xl border border-slate-700/80 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-mono font-bold text-cyan-400">${p.id}</span>
+                                    ${statusBadge}
+                                </div>
+                                <h4 class="font-bold text-white text-sm mt-2">${p.title}</h4>
+                                <div class="text-xs text-slate-400 mt-1 font-mono">Target: <span class="text-slate-200">${p.target}</span></div>
+                                <div class="text-[11px] text-purple-300 mt-2 bg-purple-950/40 p-1.5 rounded border border-purple-900/40 font-mono">
+                                    Proof: ${p.fol_proof}
+                                </div>
+                            </div>
+                            ${actionButtons}
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error("Permissions fetch error:", e);
+            }
+        }
+
+        async function decidePermission(requestId, decision) {
+            try {
+                await fetch('/api/permissions/decide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ request_id: requestId, decision: decision })
+                });
+                fetchPermissions();
+                fetchStats();
+            } catch (e) {
+                console.error("Decision error:", e);
             }
         }
 
@@ -277,6 +371,7 @@
 
             grid.innerHTML = filtered.map(agent => {
                 const statusColor = {
+                    'AUTHORIZING': 'bg-amber-950 text-amber-400 border-amber-800 animate-pulse',
                     'WORKING': 'bg-cyan-950 text-cyan-400 border-cyan-800',
                     'ANALYZING': 'bg-amber-950 text-amber-400 border-amber-800',
                     'VERIFYING': 'bg-purple-950 text-purple-400 border-purple-800',
@@ -374,7 +469,7 @@
                 role_title: document.getElementById('hire-title').value,
                 division: document.getElementById('hire-division').value,
                 mission: document.getElementById('hire-mission').value,
-                specializations: ["Security Invariant Auditing", "Automated Testing", "Code Review"]
+                specializations: ["Security Invariant Auditing", "Access Control", "Permission Evaluation"]
             };
 
             await fetch('/api/hire', {
@@ -407,16 +502,18 @@
         }
 
         function triggerAgentAction(agentName) {
-            document.getElementById('dispatch-title').value = `Direct task assignment for ${agentName}`;
+            document.getElementById('dispatch-title').value = `Permission request for: ${agentName}`;
             openDispatchModal();
         }
 
         // Init on load
         fetchStats();
+        fetchPermissions();
         fetchAgents();
         fetchInitialLogs();
         initEventStream();
         setInterval(fetchStats, 5000);
+        setInterval(fetchPermissions, 10000);
     </script>
 </body>
 </html>

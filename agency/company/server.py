@@ -2,8 +2,9 @@
 AegisKernel: Agency Company Orchestrator & Live Monitoring Server
 ==================================================================
 Manages the AI workforce, tracks agent statuses across all divisions,
-handles dynamic agent hiring, dispatches project missions, and streams
-real-time telemetry to the web dashboard.
+handles dynamic agent hiring, dispatches project missions, manages
+access control permissions via the Permission Gatekeeper Agent,
+and streams real-time telemetry to the web dashboard.
 """
 
 import os
@@ -19,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
 
-app = FastAPI(title="AegisKernel Agency Company Orchestrator", version="1.0.0")
+app = FastAPI(title="AegisKernel Agency Company Orchestrator", version="1.1.0")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -27,14 +28,60 @@ STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
 # In-memory company state
 company_state = {
-    "total_tasks_completed": 42,
+    "total_tasks_completed": 45,
     "active_missions": 6,
-    "invariants_verified": 128,
+    "invariants_verified": 134,
+    "permissions_granted": 18,
+    "permissions_denied": 2,
     "start_time": time.time(),
 }
 
+# Live permission requests managed by the Permission Gatekeeper Agent
+permission_requests: List[Dict[str, Any]] = [
+    {
+        "id": "PERM-01",
+        "title": "Execute BPF-LSM Ghost-Mirror Process Shunt",
+        "target": "PID 4096 (curl shellcode injection)",
+        "requestor": "Deep Threat Hunting Agent",
+        "division": "security",
+        "risk_tier": "HIGH",
+        "status": "PENDING",
+        "timestamp": time.strftime("%H:%M:%S"),
+        "fol_proof": "Reachable(Attacker, 4096) == SAT",
+    },
+    {
+        "id": "PERM-02",
+        "title": "Enable Live Kernel Ingestion Probe on Socket Connect",
+        "target": "tracepoint/syscalls/sys_enter_connect",
+        "requestor": "eBPF Kernel Maintainer",
+        "division": "security",
+        "risk_tier": "MEDIUM",
+        "status": "APPROVED",
+        "timestamp": time.strftime("%H:%M:%S"),
+        "fol_proof": "LSM Invariant Validated",
+    },
+    {
+        "id": "PERM-03",
+        "title": "Export Cold-Tier Provenance Parquet Snapshots to S3",
+        "target": "s3://aegis-telemetry-archive/2026-10/",
+        "requestor": "Causal Graph & GNN Architect",
+        "division": "engineering",
+        "risk_tier": "LOW",
+        "status": "PENDING",
+        "fol_proof": "Cryptographically Signed",
+        "timestamp": time.strftime("%H:%M:%S"),
+    },
+]
+
 # Live activity log stream
 activity_logs: List[Dict[str, Any]] = [
+    {
+        "timestamp": time.strftime("%H:%M:%S"),
+        "agent": "Permission Gatekeeper",
+        "division": "security",
+        "message": "Chief Permission & Access Gatekeeper assumed active command of Authorization Desk.",
+        "status": "success",
+    },
     {
         "timestamp": time.strftime("%H:%M:%S"),
         "agent": "eBPF Kernel Maintainer",
@@ -70,12 +117,17 @@ class DispatchMissionRequest(BaseModel):
     target_division: Optional[str] = "all"
     priority: Optional[str] = "HIGH"
 
+class PermissionDecisionRequest(BaseModel):
+    request_id: str
+    decision: str  # "APPROVE" or "DENY"
+
 def scan_agency_agents() -> List[Dict[str, Any]]:
     """Scans all markdown files in the agency directory and builds agent records."""
     agents = []
     
     # Priority AegisKernel hired specialists
     specialist_keys = {
+        "security-permission-access-gatekeeper": {"avatar": "🔑", "priority": True, "status": "AUTHORIZING"},
         "security-ebpf-kernel-maintainer": {"avatar": "🛡️", "priority": True, "status": "WORKING"},
         "security-ghost-mirror-deception-architect": {"avatar": "🪞", "priority": True, "status": "ANALYZING"},
         "engineering-causal-graph-gnn-architect": {"avatar": "🕸️", "priority": True, "status": "WORKING"},
@@ -95,7 +147,6 @@ def scan_agency_agents() -> List[Dict[str, Any]]:
         stem = p.stem
         spec = specialist_keys.get(stem, None)
         
-        # Derive human readable name
         parts = stem.replace("security-", "").replace("engineering-", "").replace("academic-", "").replace("research-", "").split("-")
         title = " ".join(word.capitalize() for word in parts)
         
@@ -103,7 +154,6 @@ def scan_agency_agents() -> List[Dict[str, Any]]:
         is_hired_specialist = spec is not None
         status = spec["status"] if spec else "IDLE"
 
-        # Read short snippet from file
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read(500)
@@ -123,7 +173,6 @@ def scan_agency_agents() -> List[Dict[str, Any]]:
             "path": str(p.relative_to(BASE_DIR)),
         })
 
-    # Sort specialists first, then by division
     agents.sort(key=lambda a: (not a["is_specialist"], a["division"], a["title"]))
     return agents
 
@@ -148,9 +197,39 @@ async def get_stats():
         "tasks_completed": company_state["total_tasks_completed"],
         "active_missions": company_state["active_missions"],
         "invariants_verified": company_state["invariants_verified"],
+        "permissions_granted": company_state["permissions_granted"],
         "uptime": f"{uptime_sec // 60}m {uptime_sec % 60}s",
         "system_health": "100.0% OPERATIONAL",
     })
+
+@app.get("/api/permissions")
+async def get_permissions():
+    return JSONResponse(permission_requests)
+
+@app.post("/api/permissions/decide")
+async def decide_permission(req: PermissionDecisionRequest):
+    for perm in permission_requests:
+        if perm["id"] == req.request_id:
+            perm["status"] = "APPROVED" if req.decision == "APPROVE" else "DENIED"
+            if req.decision == "APPROVE":
+                company_state["permissions_granted"] += 1
+                msg = f"ACCESS GRANTED (YES) by Gatekeeper: '{perm['title']}' on {perm['target']} approved."
+                status_type = "success"
+            else:
+                company_state["permissions_denied"] += 1
+                msg = f"ACCESS DENIED by Gatekeeper: '{perm['title']}' was rejected under zero-trust policy."
+                status_type = "error"
+
+            activity_logs.insert(0, {
+                "timestamp": time.strftime("%H:%M:%S"),
+                "agent": "Permission Gatekeeper",
+                "division": "security",
+                "message": msg,
+                "status": status_type,
+            })
+            return JSONResponse({"status": "updated", "permission": perm})
+            
+    return JSONResponse({"error": "Request ID not found"}, status_code=404)
 
 @app.post("/api/hire")
 async def hire_agent(req: HireAgentRequest):
@@ -207,6 +286,7 @@ async def stream_activity(request: Request):
     """Server-Sent Events streaming live simulation ticks."""
     async def event_generator():
         simulated_actions = [
+            ("Permission Gatekeeper", "security", "Evaluating Dual-Authorization Quorum for containment ticket: Invariant VALID -> Decision: ACCESS GRANTED (YES).", "success"),
             ("eBPF Kernel Maintainer", "security", "Executing CO-RE verifier pass against Linux 6.6 tracepoints.", "success"),
             ("Neuro-Symbolic Verifier", "engineering", "Validating Z3 reachability theorem: SMT solver returned SAT in 4.2ms.", "info"),
             ("Ghost-Mirror Deception Architect", "security", "Synthesizing dynamic canary tokens in virtual filesystem nodes.", "warning"),
