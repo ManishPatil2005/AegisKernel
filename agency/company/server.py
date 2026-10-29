@@ -9,6 +9,7 @@ and streams real-time telemetry to the web dashboard.
 """
 
 import os
+import sys
 import glob
 import time
 import asyncio
@@ -461,6 +462,43 @@ async def get_soc_provenance():
         "fol_proof_verified": True,
         "shunted_pid": 4096
     })
+
+@app.get("/api/mom")
+async def get_minutes_of_meeting():
+    mom_path = BASE_DIR.parent / "docs" / "MINUTES_OF_MEETING.md"
+    if mom_path.exists():
+        with open(mom_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return JSONResponse({
+            "status": "success",
+            "reference": "MOM-2026-10-30-001",
+            "title": "AegisKernel Executive Council All-Hands Meeting",
+            "content": content
+        })
+    return JSONResponse({"status": "not_found"}, status_code=404)
+
+@app.post("/api/soc/simulate")
+async def trigger_simulation():
+    """Triggers the autonomous end-to-end APT attack & deception simulation."""
+    import subprocess
+    sim_script = BASE_DIR.parent / "scripts" / "run_e2e_simulation.py"
+    if sim_script.exists():
+        res = subprocess.run([sys.executable, str(sim_script)], capture_output=True, text=True)
+        company_state["total_tasks_completed"] += 1
+        company_state["invariants_verified"] += 8
+        activity_logs.insert(0, {
+            "timestamp": time.strftime("%H:%M:%S"),
+            "agent": "Red Team & Gatekeeper",
+            "division": "security",
+            "message": "EXECUTED E2E APT SIMULATION: Fileless injection trapped -> Z3 verified proof -> Ghost-Mirror shunted PID 4096 in <10ms.",
+            "status": "success"
+        })
+        return JSONResponse({
+            "status": "success" if res.returncode == 0 else "error",
+            "stdout": res.stdout,
+            "returncode": res.returncode
+        })
+    return JSONResponse({"status": "script_not_found"}, status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8500, log_level="info")

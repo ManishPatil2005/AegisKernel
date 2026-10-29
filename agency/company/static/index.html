@@ -32,15 +32,21 @@
             </div>
         </div>
 
-        <div class="flex items-center space-x-4">
-            <button onclick="openHireModal()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-600/30 flex items-center gap-2">
-                <i class="fa-solid fa-user-plus"></i> Hire Specialist Agent
+        <div class="flex items-center space-x-3">
+            <button onclick="runE2ESimulation()" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition shadow-lg shadow-rose-600/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt"></i> Run APT Simulation
             </button>
-            <button onclick="openDispatchModal()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-600/30 flex items-center gap-2">
-                <i class="fa-solid fa-paper-plane"></i> Dispatch Mission
+            <button onclick="openMomModal()" class="px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition shadow-lg shadow-amber-600/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-file-lines"></i> Council MoM
             </button>
-            <a href="/soc" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/30 flex items-center gap-2">
-                <i class="fa-solid fa-cube"></i> 3D SOC Threat Console
+            <button onclick="openHireModal()" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-user-plus"></i> Hire Agent
+            </button>
+            <button onclick="openDispatchModal()" class="px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition shadow-lg shadow-cyan-600/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-paper-plane"></i> Dispatch
+            </button>
+            <a href="/soc" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-cube"></i> 3D SOC Console
             </a>
             <div class="h-6 w-px bg-slate-800"></div>
             <div class="flex items-center space-x-2 text-xs font-mono bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
@@ -282,6 +288,25 @@
                     <button type="submit" class="px-5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm">Execute Mission Dispatch</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: Minutes of Meeting (MoM) -->
+    <div id="modal-mom" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel border border-slate-700 rounded-2xl max-w-4xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines text-amber-400"></i> Executive Council Minutes of Meeting (MOM-2026-10-30-001)
+                </h3>
+                <button onclick="closeMomModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="mom-content" class="flex-1 overflow-y-auto text-xs text-slate-300 font-mono whitespace-pre-wrap p-4 bg-slate-950/80 rounded-xl border border-slate-800 leading-relaxed">
+                Loading official Council Minutes of Meeting...
+            </div>
+            <div class="flex justify-between items-center pt-3 border-t border-slate-800">
+                <span class="text-xs text-slate-500 font-mono">Quorum: 100% Present | Approved by Chief Permission Gatekeeper</span>
+                <button type="button" onclick="closeMomModal()" class="px-5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs">Dismiss</button>
+            </div>
         </div>
     </div>
 
@@ -528,6 +553,42 @@
         
         function openDispatchModal() { document.getElementById('modal-dispatch').classList.remove('hidden'); document.getElementById('modal-dispatch').classList.add('flex'); }
         function closeDispatchModal() { document.getElementById('modal-dispatch').classList.add('hidden'); document.getElementById('modal-dispatch').classList.remove('flex'); }
+
+        async function openMomModal() {
+            document.getElementById('modal-mom').classList.remove('hidden');
+            document.getElementById('modal-mom').classList.add('flex');
+            try {
+                const res = await fetch('/api/mom');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('mom-content').innerText = data.content;
+                }
+            } catch (e) {
+                document.getElementById('mom-content').innerText = "Failed to load Minutes of Meeting.";
+            }
+        }
+        function closeMomModal() {
+            document.getElementById('modal-mom').classList.add('hidden');
+            document.getElementById('modal-mom').classList.remove('flex');
+        }
+
+        async function runE2ESimulation() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/soc/simulate', { method: 'POST' });
+                const data = await res.json();
+                alert("APT Simulation Completed!\nResult: " + (data.status === 'success' ? 'Breach intercepted & shunted in <10ms' : 'Failed'));
+                fetchStats();
+            } catch (e) {
+                alert("Simulation request error: " + e);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
 
         async function submitHireAgent(e) {
             e.preventDefault();
