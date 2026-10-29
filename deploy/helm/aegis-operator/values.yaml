@@ -1,0 +1,50 @@
+# AegisKernel Helm Values Configuration
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/manishpatil2005/aegis-agent
+  pullPolicy: IfNotPresent
+  tag: "1.0.0-rc1"
+
+ebpf:
+  ringBufferSizeMB: 64
+  shuntMapCapacity: 16384
+  lineageMapCapacity: 32768
+  crownJewels:
+    - systemd
+    - sshd
+    - etcd
+    - kubelet
+
+ghostMirror:
+  enabled: true
+  cowScratchpadMemoryKB: 4096
+  canaryTokens:
+    shadowFileCanary: true
+    awsCredentialsCanary: true
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+securityContext:
+  privileged: true
+  capabilities:
+    add:
+      - BPF
+      - SYS_ADMIN
+      - SYS_PTRACE
+      - NET_ADMIN
+      - PERFMON
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+tolerations:
+  - operator: Exists
+    effect: NoSchedule

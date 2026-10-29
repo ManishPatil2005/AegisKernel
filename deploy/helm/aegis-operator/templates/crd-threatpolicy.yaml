@@ -1,0 +1,52 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: aegisthreatpolicies.security.aegiskernel.io
+spec:
+  group: security.aegiskernel.io
+  names:
+    kind: AegisThreatPolicy
+    listKind: AegisThreatPolicyList
+    plural: aegisthreatpolicies
+    singular: aegisthreatpolicy
+    shortNames:
+      - atp
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                enforcementMode:
+                  type: string
+                  enum: ["DECEPTIVE_SHUNT", "BLOCK_SIGKILL", "MONITOR_ONLY"]
+                blastRadiusThreshold:
+                  type: number
+                  minimum: 1.0
+                  maximum: 100.0
+                crownJewelExceptions:
+                  type: array
+                  items:
+                    type: string
+                ghostMirrorSettings:
+                  type: object
+                  properties:
+                    enableCoWScratchpad:
+                      type: boolean
+                    honeyTokenCanaryTypes:
+                      type: array
+                      items:
+                        type: string
+            status:
+              type: object
+              properties:
+                activeShunts:
+                  type: integer
+                lastEvaluationTimestamp:
+                  type: string

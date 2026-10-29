@@ -53,14 +53,17 @@ class NeuroSymbolicVerificationGate:
         if proposal.target_comm.lower() in cls.CROWN_JEWELS:
             return False, f"REJECTED: Target '{proposal.target_comm}' is an immutable Crown Jewel process"
 
-        # 2. Z3 SMT Solver Reachability Proof
-        s = z3.Solver()
-        Reach = z3.Function('Reach', z3.IntSort(), z3.IntSort(), z3.BoolSort())
-        Edge = z3.Function('Edge', z3.IntSort(), z3.IntSort(), z3.BoolSort())
+        # 2. Z3 SMT Solver Reachability Proof (Isolated Thread-Safe Context)
+        ctx = z3.Context()
+        s = z3.Solver(ctx=ctx)
+        int_sort = z3.IntSort(ctx=ctx)
+        bool_sort = z3.BoolSort(ctx=ctx)
+        Reach = z3.Function('Reach', int_sort, int_sort, bool_sort)
+        Edge = z3.Function('Edge', int_sort, int_sort, bool_sort)
         
-        u = z3.Int('u')
-        v = z3.Int('v')
-        w = z3.Int('w')
+        u = z3.Int('u', ctx=ctx)
+        v = z3.Int('v', ctx=ctx)
+        w = z3.Int('w', ctx=ctx)
 
         # Axioms of reachability
         s.add(z3.ForAll([u, v], z3.Implies(Edge(u, v), Reach(u, v))))
@@ -68,11 +71,11 @@ class NeuroSymbolicVerificationGate:
 
         # Assert observed graph edges
         for src, dst in causal_graph_edges:
-            s.add(Edge(src, dst))
+            s.add(Edge(z3.IntVal(src, ctx=ctx), z3.IntVal(dst, ctx=ctx)))
 
         # Check reachability between attacker and target
         s.push()
-        s.add(Reach(origin_attacker_pid, proposal.target_pid))
+        s.add(Reach(z3.IntVal(origin_attacker_pid, ctx=ctx), z3.IntVal(proposal.target_pid, ctx=ctx)))
         
         result = s.check()
         s.pop()

@@ -79,6 +79,11 @@ TEST_SUITES = [
         "cmd": [sys.executable, str(ROOT_DIR / "tests" / "adversarial-ai" / "ransomware_shunting.py")],
         "subsystem": "Red Team"
     },
+    {
+        "name": "High-Throughput Concurrency & Invariant Stress Fuzzer (25k Events)",
+        "cmd": [sys.executable, str(ROOT_DIR / "tests" / "fuzzing" / "stress_fuzzer.py")],
+        "subsystem": "Fuzzing & Robustness"
+    },
 ]
 
 def check_live_endpoints():

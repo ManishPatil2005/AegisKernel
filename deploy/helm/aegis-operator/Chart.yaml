@@ -1,0 +1,17 @@
+apiVersion: v2
+name: aegis-operator
+description: Cloud-Native Autonomous eBPF Threat Hunting & In-Kernel Deception Operator
+type: application
+version: 1.0.0
+appVersion: "1.0.0-rc1"
+keywords:
+  - ebpf
+  - security
+  - lsm
+  - kubernetes
+  - ai-swarm
+  - deception
+home: https://github.com/ManishPatil2005/AegisKernel
+maintainers:
+  - name: Manish Patil & AegisKernel Directorate
+    email: security@aegiskernel.internal
