@@ -1,0 +1,74 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": 101,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "eBPF Ring Buffer Drop Rate",
+      "type": "stat",
+      "targets": [{ "expr": "rate(aegis_bpf_ringbuf_drops_total[1m])" }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.001 }] }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "Redpanda Telemetry Lag",
+      "type": "stat",
+      "targets": [{ "expr": "aegis_kafka_consumer_lag_ms" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 50 }] }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "CT-HTGN Dynamic Anomaly Score (p)",
+      "type": "gauge",
+      "targets": [{ "expr": "max(aegis_gnn_anomaly_probability)" }],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.70 }, { "color": "red", "value": 0.85 }] }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Ghost-Mirror Active Shunts",
+      "type": "stat",
+      "targets": [{ "expr": "count(aegis_ghost_shunt_active == 1)" }],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }, { "color": "purple", "value": 1 }] }
+        }
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["aegis", "ebpf", "gnn", "soc"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "title": "AegisKernel: Master Telemetry & Invariants Overview"
+}

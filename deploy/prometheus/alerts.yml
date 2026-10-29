@@ -1,0 +1,29 @@
+groups:
+  - name: aegis_kernel_invariants
+    rules:
+      - alert: AegisBPFRingBufferHighDropRate
+        expr: rate(aegis_bpf_ringbuf_drops_total[1m]) > 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "BPF Ring Buffer dropping kernel events on host {{ $labels.instance }}"
+          description: "eBPF ring buffer drop rate is non-zero ({{ $value }} drops/sec). Investigate userspace backpressure or NVMe WAL saturation."
+
+      - alert: AegisBlastRadiusCriticalBreach
+        expr: aegis_max_blast_radius > 25.0
+        for: 0s
+        labels:
+          severity: page
+        annotations:
+          summary: "Spectral Blast Radius exceeded critical threshold"
+          description: "PID {{ $labels.pid }} on {{ $labels.instance }} has reachability score {{ $value }} > 25.0. Immediate containment or Ghost-Mirror shunt triggered."
+
+      - alert: AegisSMTProofRejection
+        expr: increase(aegis_smt_solver_rejections_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Neuro-symbolic Z3 SMT solver rejected hallucinated containment action"
+          description: "AI Swarm proposed action violating Crown Jewel invariants or causal DAG reachability."
