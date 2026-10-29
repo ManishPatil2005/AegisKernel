@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisKernel Agency | Company Operations & Agent Swarm Command</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #0b0f19; color: #e2e8f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        .glow-cyan { box-shadow: 0 0 20px rgba(6, 182, 212, 0.25); }
+        .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); }
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="glass-panel border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/30">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide text-white flex items-center gap-3">
+                    AEGISKERNEL AGENCY <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 uppercase font-mono">Company Live</span>
+                </h1>
+                <p class="text-xs text-slate-400">Autonomous Multi-Agent Enterprise Threat Hunting & Kernel Deception Workforce</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <button onclick="openHireModal()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-600/30 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> Hire Specialist Agent
+            </button>
+            <button onclick="openDispatchModal()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-600/30 flex items-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Dispatch Mission
+            </button>
+            <div class="h-6 w-px bg-slate-800"></div>
+            <div class="flex items-center space-x-2 text-xs font-mono bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="live-clock" class="text-slate-300">00:00:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Command Body -->
+    <main class="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
+
+        <!-- Company Metrics Overview Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="glass-panel p-4 rounded-xl border border-slate-800 relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Total Hired Workforce</div>
+                <div id="stat-total-agents" class="text-3xl font-extrabold text-white mt-1">--</div>
+                <div class="text-xs text-cyan-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-users"></i> Across 18 Divisions
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl border border-cyan-800/40 glow-cyan relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Aegis Specialists</div>
+                <div id="stat-specialists" class="text-3xl font-extrabold text-cyan-400 mt-1">6</div>
+                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-star text-amber-400"></i> Core Project Leads
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl border border-slate-800 relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Active Missions</div>
+                <div id="stat-active-missions" class="text-3xl font-extrabold text-white mt-1">--</div>
+                <div class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-bolt"></i> Sprint 1 in Progress
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl border border-slate-800 relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">SMT Proofs Verified</div>
+                <div id="stat-invariants" class="text-3xl font-extrabold text-purple-400 mt-1">--</div>
+                <div class="text-xs text-purple-300 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-check-double"></i> 0 Hallucinations
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl border border-slate-800 relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Company Uptime</div>
+                <div id="stat-uptime" class="text-3xl font-extrabold text-emerald-400 mt-1">--</div>
+                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i> 100% Operational
+                </div>
+            </div>
+        </div>
+
+        <!-- Division Filtering Bar -->
+        <div class="flex items-center justify-between pb-2">
+            <div class="flex items-center space-x-2 overflow-x-auto py-1">
+                <button onclick="filterDivision('all')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-600 text-white transition" data-div="all">All Divisions</button>
+                <button onclick="filterDivision('security')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-div="security">Security Squad</button>
+                <button onclick="filterDivision('engineering')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-div="engineering">Engineering Squad</button>
+                <button onclick="filterDivision('research')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-div="research">Research Squad</button>
+                <button onclick="filterDivision('specialist')" class="div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-div="specialist">⭐ Aegis Leads</button>
+            </div>
+            <div class="text-xs text-slate-400 font-mono" id="showing-agent-count">Loading company roster...</div>
+        </div>
+
+        <!-- Split Grid: Agent Roster (Left) & Real-Time Terminal Activity (Right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Agent Cards Grid (2 Cols on desktop) -->
+            <div class="lg:col-span-2 space-y-4">
+                <div id="agents-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated dynamically via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Real-Time Company Activity Stream Terminal -->
+            <div class="glass-panel rounded-xl border border-slate-800 p-4 flex flex-col h-[700px]">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-terminal text-cyan-400"></i>
+                        <span class="font-bold text-sm tracking-wide text-white uppercase font-mono">Live Operations Stream</span>
+                    </div>
+                    <span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">STREAMING</span>
+                </div>
+
+                <div id="terminal-logs" class="flex-1 overflow-y-auto terminal-scroll mt-3 space-y-2 text-xs font-mono">
+                    <!-- Populated dynamically via SSE stream -->
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500 font-mono">
+                    <span>Aegis Swarm Protocol v1.0.0</span>
+                    <button onclick="clearTerminal()" class="hover:text-slate-300">Clear Feed</button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal: Hire Specialist Agent -->
+    <div id="modal-hire" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-emerald-400"></i> Hire New Specialist Agent
+                </h3>
+                <button onclick="closeHireModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="hire-form" onsubmit="submitHireAgent(event)" class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Agent Name</label>
+                    <input type="text" id="hire-name" required placeholder="e.g. Memory Safety Auditor" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Role Title</label>
+                    <input type="text" id="hire-title" required placeholder="e.g. Principal Rust Memory Safety Specialist" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Company Division</label>
+                    <select id="hire-division" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="security">Security Squad</option>
+                        <option value="engineering">Engineering Squad</option>
+                        <option value="research">Research Squad</option>
+                        <option value="strategy">Strategy & Architecture</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Primary Mission Description</label>
+                    <textarea id="hire-mission" required rows="3" placeholder="Define the primary engineering and security deliverables for this agent..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeHireModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm">Sign Employment Contract</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Dispatch Mission -->
+    <div id="modal-dispatch" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane text-cyan-400"></i> Dispatch Company Mission
+                </h3>
+                <button onclick="closeDispatchModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="dispatch-form" onsubmit="submitDispatchMission(event)" class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Mission Objective</label>
+                    <input type="text" id="dispatch-title" required placeholder="e.g. Verify BPF Ring Buffer under 100k events/sec" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Target Division</label>
+                    <select id="dispatch-division" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="all">Entire Company Swarm</option>
+                        <option value="security">Security Squad</option>
+                        <option value="engineering">Engineering Squad</option>
+                        <option value="research">Research Squad</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Priority Tier</label>
+                    <select id="dispatch-priority" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="CRITICAL">P0 - Critical Security Invariant</option>
+                        <option value="HIGH">P1 - High Priority Milestone</option>
+                        <option value="STANDARD">P2 - Standard Optimization</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeDispatchModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm">Execute Mission Dispatch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let allAgents = [];
+        let currentFilter = 'all';
+
+        // Live Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toTimeString().split(' ')[0];
+        }, 1000);
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                document.getElementById('stat-total-agents').innerText = data.total_agents;
+                document.getElementById('stat-specialists').innerText = data.hired_specialists;
+                document.getElementById('stat-active-missions').innerText = data.active_missions;
+                document.getElementById('stat-invariants').innerText = data.invariants_verified;
+                document.getElementById('stat-uptime').innerText = data.uptime;
+            } catch (e) {
+                console.error("Stats fetch error:", e);
+            }
+        }
+
+        async function fetchAgents() {
+            try {
+                const res = await fetch('/api/agents');
+                allAgents = await res.json();
+                renderAgents();
+            } catch (e) {
+                console.error("Agents fetch error:", e);
+            }
+        }
+
+        function filterDivision(div) {
+            currentFilter = div;
+            document.querySelectorAll('.div-btn').forEach(btn => {
+                if (btn.getAttribute('data-div') === div) {
+                    btn.className = "div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-600 text-white transition";
+                } else {
+                    btn.className = "div-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+                }
+            });
+            renderAgents();
+        }
+
+        function renderAgents() {
+            const grid = document.getElementById('agents-grid');
+            let filtered = allAgents;
+
+            if (currentFilter === 'specialist') {
+                filtered = allAgents.filter(a => a.is_specialist);
+            } else if (currentFilter !== 'all') {
+                filtered = allAgents.filter(a => a.division === currentFilter);
+            }
+
+            document.getElementById('showing-agent-count').innerText = `Displaying ${filtered.length} of ${allAgents.length} Agents`;
+
+            grid.innerHTML = filtered.map(agent => {
+                const statusColor = {
+                    'WORKING': 'bg-cyan-950 text-cyan-400 border-cyan-800',
+                    'ANALYZING': 'bg-amber-950 text-amber-400 border-amber-800',
+                    'VERIFYING': 'bg-purple-950 text-purple-400 border-purple-800',
+                    'COLLABORATING': 'bg-blue-950 text-blue-400 border-blue-800',
+                    'SIMULATING': 'bg-rose-950 text-rose-400 border-rose-800',
+                    'IDLE': 'bg-slate-900 text-slate-400 border-slate-800'
+                }[agent.status] || 'bg-slate-900 text-slate-400 border-slate-800';
+
+                const borderHighlight = agent.is_specialist ? 'border-cyan-500/40 glow-cyan' : 'border-slate-800';
+                const starBadge = agent.is_specialist ? '<span class="text-amber-400 text-xs">⭐ Hired Lead</span>' : '';
+
+                return `
+                    <div class="glass-panel p-4 rounded-xl border ${borderHighlight} flex flex-col justify-between transition hover:border-slate-600">
+                        <div>
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center text-xl">
+                                        ${agent.avatar}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-white text-sm leading-tight">${agent.title}</h4>
+                                        <div class="text-xs text-slate-400 capitalize mt-0.5">${agent.division} Division ${starBadge}</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] px-2 py-0.5 rounded border font-mono font-bold ${statusColor}">
+                                    ${agent.status}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-300 mt-3 line-clamp-2 leading-relaxed">
+                                ${agent.summary}
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span class="truncate max-w-[200px]">${agent.path}</span>
+                            <button onclick="triggerAgentAction('${agent.title}')" class="text-cyan-400 hover:text-cyan-300 font-sans font-semibold">Assign Task &rarr;</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function fetchInitialLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const logs = await res.json();
+                logs.forEach(addLogToTerminal);
+            } catch (e) {
+                console.error("Logs fetch error:", e);
+            }
+        }
+
+        function addLogToTerminal(log) {
+            const terminal = document.getElementById('terminal-logs');
+            const colorClass = {
+                'success': 'text-emerald-400',
+                'warning': 'text-amber-400',
+                'info': 'text-cyan-400',
+                'error': 'text-rose-400'
+            }[log.status] || 'text-slate-300';
+
+            const logEntry = document.createElement('div');
+            logEntry.className = 'p-2 rounded bg-slate-900/60 border border-slate-800/60 flex items-start space-x-2';
+            logEntry.innerHTML = `
+                <span class="text-slate-500 font-mono">[${log.timestamp}]</span>
+                <span class="font-bold ${colorClass}">[${log.agent}]:</span>
+                <span class="text-slate-300 flex-1">${log.message}</span>
+            `;
+            terminal.prepend(logEntry);
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminal-logs').innerHTML = '';
+        }
+
+        // Connect Server-Sent Events (SSE) Stream
+        function initEventStream() {
+            const evtSource = new EventSource('/api/stream');
+            evtSource.onmessage = function(e) {
+                const log = JSON.parse(e.data);
+                addLogToTerminal(log);
+                fetchStats();
+            };
+        }
+
+        function openHireModal() { document.getElementById('modal-hire').classList.remove('hidden'); document.getElementById('modal-hire').classList.add('flex'); }
+        function closeHireModal() { document.getElementById('modal-hire').classList.add('hidden'); document.getElementById('modal-hire').classList.remove('flex'); }
+        
+        function openDispatchModal() { document.getElementById('modal-dispatch').classList.remove('hidden'); document.getElementById('modal-dispatch').classList.add('flex'); }
+        function closeDispatchModal() { document.getElementById('modal-dispatch').classList.add('hidden'); document.getElementById('modal-dispatch').classList.remove('flex'); }
+
+        async function submitHireAgent(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('hire-name').value,
+                role_title: document.getElementById('hire-title').value,
+                division: document.getElementById('hire-division').value,
+                mission: document.getElementById('hire-mission').value,
+                specializations: ["Security Invariant Auditing", "Automated Testing", "Code Review"]
+            };
+
+            await fetch('/api/hire', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            closeHireModal();
+            fetchAgents();
+            fetchStats();
+        }
+
+        async function submitDispatchMission(e) {
+            e.preventDefault();
+            const payload = {
+                mission_title: document.getElementById('dispatch-title').value,
+                target_division: document.getElementById('dispatch-division').value,
+                priority: document.getElementById('dispatch-priority').value
+            };
+
+            await fetch('/api/dispatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            closeDispatchModal();
+            fetchStats();
+        }
+
+        function triggerAgentAction(agentName) {
+            document.getElementById('dispatch-title').value = `Direct task assignment for ${agentName}`;
+            openDispatchModal();
+        }
+
+        // Init on load
+        fetchStats();
+        fetchAgents();
+        fetchInitialLogs();
+        initEventStream();
+        setInterval(fetchStats, 5000);
+    </script>
+</body>
+</html>
