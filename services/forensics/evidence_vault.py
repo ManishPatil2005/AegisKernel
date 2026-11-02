@@ -27,7 +27,23 @@ class ForensicEvidenceVault:
     def __init__(self, vault_dir: Optional[Path] = None, signing_key: Optional[bytes] = None):
         self.vault_dir = vault_dir or (Path(__file__).resolve().parent.parent.parent / "evidence_vault")
         self.vault_dir.mkdir(parents=True, exist_ok=True)
-        self.signing_key = signing_key or os.urandom(32)
+        self.signing_key = signing_key or self._load_or_create_master_key()
+
+    def _load_or_create_master_key(self) -> bytes:
+        """Loads persistent master HMAC key from secure keyfile (ENG-P1-04)."""
+        key_file = self.vault_dir / ".aegis_master_signing.key"
+        if key_file.exists():
+            try:
+                return key_file.read_bytes()
+            except Exception:
+                pass
+        # Generate and persist key
+        new_key = os.urandom(32)
+        try:
+            key_file.write_bytes(new_key)
+        except Exception:
+            pass
+        return new_key
 
     def seal_incident_evidence(
         self,

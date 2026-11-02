@@ -9,6 +9,7 @@ Manages in-kernel process shunting and dynamic decoy synthesis:
 """
 
 from typing import Dict, List, Any, Optional
+from pathlib import Path
 import hmac
 import hashlib
 import time
@@ -24,7 +25,24 @@ class GhostMirrorOrchestrator:
     """
 
     def __init__(self, secret_key: Optional[bytes] = None):
-        self.secret_key = secret_key or os.urandom(32)
+        key_dir = Path(__file__).resolve().parent.parent.parent / "evidence_vault"
+        key_dir.mkdir(parents=True, exist_ok=True)
+        key_file = key_dir / ".aegis_canary_master.key"
+        
+        if secret_key:
+            self.secret_key = secret_key
+        elif key_file.exists():
+            try:
+                self.secret_key = key_file.read_bytes()
+            except Exception:
+                self.secret_key = os.urandom(32)
+        else:
+            self.secret_key = os.urandom(32)
+            try:
+                key_file.write_bytes(self.secret_key)
+            except Exception:
+                pass
+
         self.shunted_processes: Dict[int, Dict[str, Any]] = {}
         self.active_canaries: Dict[str, Dict[str, Any]] = {}
 

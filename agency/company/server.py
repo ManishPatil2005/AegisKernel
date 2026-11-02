@@ -38,6 +38,19 @@ company_state = {
     "start_time": time.time(),
 }
 
+# API Security Gateway & Bearer Token Authentication (ENG-P0-02)
+AEGIS_API_TOKEN = os.environ.get("AEGIS_API_TOKEN", "aegis-sec-token-2026")
+
+def is_request_authorized(req: Request) -> bool:
+    """Verifies API Bearer token for mutating control plane requests."""
+    client_ip = req.client.host if req.client else "127.0.0.1"
+    token = req.headers.get("X-Aegis-Token") or req.headers.get("Authorization", "").replace("Bearer ", "").strip()
+    
+    # Loopback requests without token permitted in dev; external requests strictly require token
+    if client_ip in ("127.0.0.1", "localhost", "::1") and (not token or token == AEGIS_API_TOKEN):
+        return True
+    return token == AEGIS_API_TOKEN
+
 # Live Workload Schedule: "Who is Working on What and When"
 live_workload_schedule = [
     {
@@ -599,6 +612,9 @@ async def trigger_scenario(scenario_id: str):
 @app.post("/api/cli/exec")
 async def execute_cli_command(req: Request):
     """Executes aegisctl operator commands from the web console."""
+    if not is_request_authorized(req):
+        return JSONResponse({"status": "error", "output": "UNAUTHORIZED: Missing or invalid X-Aegis-Token / Bearer token"}, status_code=401)
+
     import subprocess
     body = await req.json()
     command = body.get("command", "status").strip()
