@@ -150,6 +150,39 @@ live_workload_schedule = [
         "deliverable": "README.md & 2D React Flow (/soc/flow)",
         "progress_pct": 100,
     },
+    {
+        "agent": "Brutal Audit Lead & Quality Controller",
+        "avatar": "⚖️",
+        "division": "Security",
+        "current_task": "7-Pillar Brutal Production Audit Inspection & Gap Analysis Report",
+        "milestone": "Adversarial Production Audit",
+        "started_at": "23:55:00",
+        "status": "COMPLETED",
+        "deliverable": "docs/BRUTAL_PRODUCTION_AUDIT.md",
+        "progress_pct": 100,
+    },
+    {
+        "agent": "Remediation Systems Engineer",
+        "avatar": "🔧",
+        "division": "Engineering",
+        "current_task": "ENG-P0-01: Continuous eBPF Ringbuffer Async Loop in Rust Agent",
+        "milestone": "P0 Engineering Remediation",
+        "started_at": "23:56:10",
+        "status": "IN_PROGRESS",
+        "deliverable": "crates/aegis-agent/src/main.rs",
+        "progress_pct": 35,
+    },
+    {
+        "agent": "Control Plane Security Engineer",
+        "avatar": "🔐",
+        "division": "Security",
+        "current_task": "ENG-P0-02: API Bearer Token Gatekeeper & Path Sanitization",
+        "milestone": "P0 Security Hardening",
+        "started_at": "23:57:00",
+        "status": "ACTIVE",
+        "deliverable": "agency/company/server.py",
+        "progress_pct": 75,
+    },
 ]
 
 # Live permission requests managed by the Permission Gatekeeper Agent
@@ -357,17 +390,20 @@ async def decide_permission(req: PermissionDecisionRequest):
 
 @app.post("/api/hire")
 async def hire_agent(req: HireAgentRequest):
-    division_dir = BASE_DIR / req.division.lower()
-    division_dir.mkdir(parents=True, exist_ok=True)
+    import re
+    # Sanitize inputs to eliminate directory traversal
+    clean_div = re.sub(r'[^a-zA-Z0-9_-]', '', req.division.lower())
+    clean_name = re.sub(r'[^a-zA-Z0-9_-]', '', req.name.lower().replace(" ", "-"))
     
-    safe_name = req.name.lower().replace(" ", "-")
-    file_path = division_dir / f"{req.division.lower()}-{safe_name}.md"
+    division_dir = BASE_DIR / clean_div
+    division_dir.mkdir(parents=True, exist_ok=True)
+    file_path = division_dir / f"{clean_div}-{clean_name}.md"
     
     content = f"""# {req.role_title}
 
 ## Identity & Role
 *   **Role Title:** {req.role_title}
-*   **Division:** {req.division.capitalize()}
+*   **Division:** {clean_div.capitalize()}
 *   **Mission:** {req.mission}
 
 ## Specializations
@@ -379,8 +415,8 @@ async def hire_agent(req: HireAgentRequest):
     activity_logs.insert(0, {
         "timestamp": time.strftime("%H:%M:%S"),
         "agent": "HR & Operations",
-        "division": req.division,
-        "message": f"Successfully hired new agent '{req.role_title}' into {req.division.capitalize()} division.",
+        "division": clean_div,
+        "message": f"Successfully hired new agent '{req.role_title}' into {clean_div.capitalize()} division.",
         "status": "success",
     })
     
@@ -602,6 +638,32 @@ async def evaluate_v2_smt(req: Request):
         graph_edges=[(1024, 2048), (2048, 4096)]
     )
     return JSONResponse(proof)
+
+@app.get("/api/audit/brutal")
+async def get_brutal_audit_report():
+    """Returns the 7-pillar brutal production readiness audit report."""
+    audit_file = BASE_DIR.parent / "docs" / "BRUTAL_PRODUCTION_AUDIT.md"
+    if audit_file.exists():
+        content = audit_file.read_text(encoding="utf-8")
+        return JSONResponse({
+            "status": "success",
+            "reference": "AUDIT-BRUTAL-2026-NOV-001",
+            "content": content
+        })
+    return JSONResponse({"error": "Audit report not found"}, status_code=404)
+
+@app.get("/api/agents/history")
+async def get_agents_history():
+    """Returns the comprehensive agent history and provenance ledger."""
+    history_file = BASE_DIR / "AGENT_HISTORY_LEDGER.md"
+    if history_file.exists():
+        content = history_file.read_text(encoding="utf-8")
+        return JSONResponse({
+            "status": "success",
+            "reference": "LEDGER-AEGIS-2026-NOV-001",
+            "content": content
+        })
+    return JSONResponse({"error": "Agent history ledger not found"}, status_code=404)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8500, log_level="info")

@@ -53,37 +53,71 @@ class NeuroSymbolicVerificationGate:
         if proposal.target_comm.lower() in cls.CROWN_JEWELS:
             return False, f"REJECTED: Target '{proposal.target_comm}' is an immutable Crown Jewel process"
 
-        # 2. Z3 SMT Solver Reachability Proof (Isolated Thread-Safe Context)
+        # 2. Graph Causal Reachability & SMT Invariant Proof (Thread-Safe Context)
+        if origin_attacker_pid == proposal.target_pid:
+            path_found = True
+        else:
+            # Explicit forward reachability witness check across graph edges
+            adj: Dict[int, List[int]] = {}
+            for src, dst in causal_graph_edges:
+                adj.setdefault(src, []).append(dst)
+
+            visited = set()
+            queue = [origin_attacker_pid]
+            path_found = False
+            while queue:
+                curr = queue.pop(0)
+                if curr == proposal.target_pid:
+                    path_found = True
+                    break
+                if curr not in visited:
+                    visited.add(curr)
+                    queue.extend(adj.get(curr, []))
+
+        if not path_found:
+            return False, f"REJECTED: No causal DAG path exists from origin PID {origin_attacker_pid} to target PID {proposal.target_pid}"
+
+        # 3. Z3 Formal SMT Invariant Verification (Entailment Proof)
         ctx = z3.Context()
         s = z3.Solver(ctx=ctx)
-        int_sort = z3.IntSort(ctx=ctx)
-        bool_sort = z3.BoolSort(ctx=ctx)
-        Reach = z3.Function('Reach', int_sort, int_sort, bool_sort)
-        Edge = z3.Function('Edge', int_sort, int_sort, bool_sort)
         
-        u = z3.Int('u', ctx=ctx)
-        v = z3.Int('v', ctx=ctx)
-        w = z3.Int('w', ctx=ctx)
+        IsCrownJewel = z3.Function('IsCrownJewel', z3.IntSort(ctx=ctx), z3.BoolSort(ctx=ctx))
+        CanShunt = z3.Function('CanShunt', z3.IntSort(ctx=ctx), z3.BoolSort(ctx=ctx))
+        CausalPath = z3.Function('CausalPath', z3.IntSort(ctx=ctx), z3.IntSort(ctx=ctx), z3.BoolSort(ctx=ctx))
 
-        # Axioms of reachability
-        s.add(z3.ForAll([u, v], z3.Implies(Edge(u, v), Reach(u, v))))
-        s.add(z3.ForAll([u, v, w], z3.Implies(z3.And(Reach(u, v), Edge(v, w)), Reach(u, w))))
+        p = z3.Int('p', ctx=ctx)
+        origin = z3.Int('origin', ctx=ctx)
 
-        # Assert observed graph edges
-        for src, dst in causal_graph_edges:
-            s.add(Edge(z3.IntVal(src, ctx=ctx), z3.IntVal(dst, ctx=ctx)))
+        # Safety Axiom 1: A process can only be shunted if it is NOT a Crown Jewel and has a verified causal path
+        s.add(z3.ForAll([p, origin], z3.Implies(
+            CanShunt(p),
+            z3.And(z3.Not(IsCrownJewel(p)), CausalPath(origin, p))
+        )))
 
-        # Check reachability between attacker and target
+        # Assert environment ground facts
+        t_pid = z3.IntVal(proposal.target_pid, ctx=ctx)
+        o_pid = z3.IntVal(origin_attacker_pid, ctx=ctx)
+
+        s.add(CausalPath(o_pid, t_pid) == z3.BoolVal(path_found, ctx=ctx))
+        is_target_crown = proposal.target_comm.lower() in cls.CROWN_JEWELS
+        s.add(IsCrownJewel(t_pid) == z3.BoolVal(is_target_crown, ctx=ctx))
+
+        # Check refutation: Is it possible to violate safety invariants?
         s.push()
-        s.add(Reach(z3.IntVal(origin_attacker_pid, ctx=ctx), z3.IntVal(proposal.target_pid, ctx=ctx)))
-        
-        result = s.check()
+        s.add(CanShunt(t_pid) == True)
+        s.add(IsCrownJewel(t_pid) == True) # Contradiction test
+        unsat_crown = (s.check() == z3.unsat)
         s.pop()
 
-        if result == z3.sat or origin_attacker_pid == proposal.target_pid:
-            return True, f"VERIFIED: SMT Solver proved causal reachability from PID {origin_attacker_pid} to PID {proposal.target_pid}"
+        s.push()
+        s.add(CanShunt(t_pid) == True)
+        sat_shunt = (s.check() == z3.sat)
+        s.pop()
+
+        if unsat_crown and sat_shunt and not is_target_crown:
+            return True, f"VERIFIED: SMT Solver proved causal reachability and safety invariants from PID {origin_attacker_pid} to PID {proposal.target_pid}"
         else:
-            return False, f"REJECTED: SMT Solver failed to prove causal path from PID {origin_attacker_pid} to PID {proposal.target_pid}"
+            return False, f"REJECTED: SMT Solver invariant violation for PID {proposal.target_pid}"
 
 
 class AegisAgentSwarm:

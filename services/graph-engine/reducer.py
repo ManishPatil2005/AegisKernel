@@ -44,11 +44,13 @@ class StreamingEdgeReducer:
     """
     Stateful streaming reducer that aggregates repetitive events across
     sliding time windows and enforces node degree rate limits.
+    Includes bounded LRU-style eviction to prevent memory leaks in production.
     """
 
-    def __init__(self, window_sec: float = 60.0, max_edges_per_node: int = 512):
+    def __init__(self, window_sec: float = 60.0, max_edges_per_node: int = 512, max_total_edges: int = 50000):
         self.window_sec = window_sec
         self.max_edges_per_node = max_edges_per_node
+        self.max_total_edges = max_total_edges
         # Key: (src, dst, event_type) -> CompressedEdge
         self.active_edges: Dict[Tuple[int, int, str], CompressedEdge] = {}
         # Key: src_pid -> count of distinct targets in current window
@@ -78,7 +80,15 @@ class StreamingEdgeReducer:
             )
             return None
 
-        # 3. Create new compressed edge
+        # 3. Enforce global memory bound to prevent leak under DoS
+        if len(self.active_edges) >= self.max_total_edges:
+            # Evict oldest 10% of active edges
+            evict_count = max(1, self.max_total_edges // 10)
+            sorted_keys = sorted(self.active_edges.keys(), key=lambda k: self.active_edges[k].last_seen_ns)
+            for k in sorted_keys[:evict_count]:
+                del self.active_edges[k]
+
+        # 4. Create new compressed edge
         compressed = CompressedEdge(src, dst, event_type, timestamp_ns)
         self.active_edges[edge_key] = compressed
         self.out_degree_counts[src] = current_degree + 1
@@ -93,9 +103,16 @@ class StreamingEdgeReducer:
         return flushed
 
     def _check_window_rollover(self):
-        """Resets out-degree rate limits when the sliding window elapses."""
+        """Resets out-degree rate limits and expires stale edges when sliding window elapses."""
         now = time.time()
-        if now - self.window_start_time >= self.window_sec:
+        elapsed = now - self.window_start_time
+        if elapsed >= self.window_sec:
+            # Expire edges older than window_sec to prevent unbounded memory growth
+            cutoff_ns = int((now - self.window_sec) * 1e9)
+            stale_keys = [k for k, edge in self.active_edges.items() if edge.last_seen_ns < cutoff_ns]
+            for k in stale_keys:
+                del self.active_edges[k]
+
             self.out_degree_counts.clear()
             self.window_start_time = now
 
