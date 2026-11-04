@@ -15,6 +15,13 @@ Outputs continuous structural divergence anomaly probability [0.0, 1.0].
 import math
 from typing import Dict, List, Tuple, Any
 import logging
+import numpy as np
+
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
 
 logger = logging.getLogger("aegis-rgcn-engine")
 
@@ -23,17 +30,24 @@ class RelationalGraphConvolution:
     """
     Mathematical formulation of Relational Graph Convolution (RGCN):
     h_i^(l+1) = sigma( W_0 * h_i^(l) + sum_{r in R} sum_{j in N_i^r} (1 / c_{i,r}) * W_r * h_j^(l) )
+    Vectorized using SIMD/BLAS matrix operations for real-time inference (ENG-P1-03).
     """
     def __init__(self, in_channels: int, out_channels: int, num_relations: int):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.num_relations = num_relations
-        # Relation weights initialized deterministically
-        self.w_self = [[0.1 * ((i + j) % 5) for j in range(out_channels)] for i in range(in_channels)]
-        self.w_rel = [
-            [[0.05 * ((r + i + j) % 7) for j in range(out_channels)] for i in range(in_channels)]
-            for r in range(num_relations)
-        ]
+        # Relation weights initialized deterministically as NumPy tensors
+        self.w_self = np.array(
+            [[0.1 * ((i + j) % 5) for j in range(out_channels)] for i in range(in_channels)],
+            dtype=np.float32
+        )
+        self.w_rel = np.array(
+            [
+                [[0.05 * ((r + i + j) % 7) for j in range(out_channels)] for i in range(in_channels)]
+                for r in range(num_relations)
+            ],
+            dtype=np.float32
+        )
 
     def forward(
         self,
@@ -41,33 +55,25 @@ class RelationalGraphConvolution:
         edge_index: List[Tuple[int, int]],
         edge_type: List[int]
     ) -> List[List[float]]:
-        num_nodes = len(node_features)
-        out = [[0.0] * self.out_channels for _ in range(num_nodes)]
+        X = np.array(node_features, dtype=np.float32)
+        num_nodes = len(X)
+        if num_nodes == 0:
+            return []
 
-        # Self-loop transformation
-        for i in range(num_nodes):
-            for oc in range(self.out_channels):
-                val = 0.0
-                for ic in range(self.in_channels):
-                    val += node_features[i][ic] * self.w_self[ic][oc]
-                out[i][oc] += val
+        # Vectorized Self-loop transformation: X @ W_self (N x out_channels)
+        out = X @ self.w_self
 
-        # Relational neighbor aggregation
-        for (src, dst), r in zip(edge_index, edge_type):
-            if r >= self.num_relations:
-                continue
-            for oc in range(self.out_channels):
-                val = 0.0
-                for ic in range(self.in_channels):
-                    val += node_features[src][ic] * self.w_rel[r][ic][oc]
-                out[dst][oc] += val * 0.5  # Normalization c_{i,r}
+        # Vectorized Relational neighbor aggregation
+        if edge_index and edge_type:
+            for (src, dst), r in zip(edge_index, edge_type):
+                if 0 <= r < self.num_relations and src < num_nodes and dst < num_nodes:
+                    # Relational projection: X[src] @ W_rel[r]
+                    h_rel = X[src] @ self.w_rel[r] * 0.5 # Normalization c_{i,r}
+                    out[dst] += h_rel
 
-        # ReLU activation
-        for i in range(num_nodes):
-            for oc in range(self.out_channels):
-                out[i][oc] = max(0.0, out[i][oc])
-
-        return out
+        # Vectorized ReLU activation: max(0, out)
+        out = np.maximum(0.0, out)
+        return out.tolist()
 
 
 class AegisRGCNAnomalyClassifier:

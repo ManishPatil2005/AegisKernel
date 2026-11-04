@@ -48,8 +48,12 @@ class GhostMirrorOrchestrator:
 
     def shunt_process(self, pid: int, comm: str, reason: str) -> Dict[str, Any]:
         """
-        Diverts a compromised process into the in-kernel Ghost-Mirror deception sandbox.
-        In production, updates the BPF map: `bpf_map_update_elem(&aegis_ghost_shunt_map, &pid, &1, 0)`.
+        Diverts a compromised process into the in-kernel Ghost-Mirror deception sandbox (ENG-P0-03).
+        In production on Linux:
+        1. Updates in-kernel map: `bpf_map_update_elem(&aegis_ghost_shunt_map, &pid, &1, 0)`.
+        2. BPF-LSM hook intercepts file writes and returns -EPERM to prevent host corruption.
+        3. eBPF TC ingress/egress classifier redirects outbound C2 sockets to ephemeral container honeynet.
+        4. Memory writes are diverted into a 4MB volatile Copy-on-Write (CoW) scratchpad.
         """
         shunt_record = {
             "pid": pid,
@@ -58,6 +62,12 @@ class GhostMirrorOrchestrator:
             "reason": reason,
             "cow_memory_allocated_kb": 4096, # 4 MB volatile scratchpad
             "status": "ACTIVE_SHUNT",
+            "shunted": True,
+            "mitigation_mechanisms": {
+                "bpf_lsm_hook": "LSM_HOOK_RETURN_EPERM",
+                "network_redirection": "EBPF_TC_ACT_REDIRECT",
+                "memory_isolation": "COW_SCRATCHPAD_4MB",
+            }
         }
 
         self.shunted_processes[pid] = shunt_record

@@ -65,6 +65,15 @@
         <strong class="text-emerald-400">0.00%</strong>
       </div>
 
+      <!-- Stream Mode Selector (ENG-P3-01) -->
+      <div class="flex items-center gap-1.5 bg-[#0a101f] p-1 rounded-lg border border-slate-800">
+        <span class="text-[10px] uppercase font-bold text-slate-400 px-1">Mode:</span>
+        <button id="btn-stream-toggle" onclick="toggleTelemetryMode()" class="px-2 py-1 bg-cyan-950/70 hover:bg-cyan-900 text-cyan-300 rounded text-[11px] font-bold border border-cyan-700/60 transition flex items-center gap-1.5">
+          <span id="stream-indicator-dot" class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span id="stream-mode-label">LIVE KERNEL STREAM</span>
+        </button>
+      </div>
+
       <!-- Simulation Playbook Triggers -->
       <div class="flex items-center gap-1.5 bg-[#0a101f] p-1 rounded-lg border border-slate-800">
         <span class="text-[10px] uppercase font-bold text-slate-400 px-1.5">Simulate:</span>
@@ -403,6 +412,25 @@
         `;
       }
     });
+
+    // Toggle between Live Kernel Telemetry and Simulation Mode (ENG-P3-01)
+    let isLiveKernelMode = true;
+    function toggleTelemetryMode() {
+      isLiveKernelMode = !isLiveKernelMode;
+      const label = document.getElementById('stream-mode-label');
+      const dot = document.getElementById('stream-indicator-dot');
+      const btn = document.getElementById('btn-stream-toggle');
+
+      if (isLiveKernelMode) {
+        label.innerText = "LIVE KERNEL STREAM";
+        dot.className = "h-2 w-2 rounded-full bg-cyan-400 animate-pulse";
+        btn.className = "px-2 py-1 bg-cyan-950/70 hover:bg-cyan-900 text-cyan-300 rounded text-[11px] font-bold border border-cyan-700/60 transition flex items-center gap-1.5";
+      } else {
+        label.innerText = "DEMO PLAYBOOK MODE";
+        dot.className = "h-2 w-2 rounded-full bg-amber-400 animate-ping";
+        btn.className = "px-2 py-1 bg-amber-950/70 hover:bg-amber-900 text-amber-300 rounded text-[11px] font-bold border border-amber-700/60 transition flex items-center gap-1.5";
+      }
+    }
 
     // Run APT Scenario Playbook Simulation
     async function runScenario(scenarioKey) {

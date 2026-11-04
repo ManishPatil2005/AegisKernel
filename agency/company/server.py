@@ -564,6 +564,20 @@ async def get_minutes_of_meeting():
         })
     return JSONResponse({"status": "not_found"}, status_code=404)
 
+@app.get("/api/mom/audit")
+async def get_audit_minutes_of_meeting():
+    """Returns the formal minutes of the multi-agent brutal audit meeting."""
+    mom_path = BASE_DIR.parent / "docs" / "AUDIT_MEETING_MOM.md"
+    if mom_path.exists():
+        content = mom_path.read_text(encoding="utf-8")
+        return JSONResponse({
+            "status": "success",
+            "reference": "MOM-2026-11-04-AUDIT",
+            "title": "AegisKernel Multi-Agent Executive Council: Brutal Audit All-Hands Meeting",
+            "content": content
+        })
+    return JSONResponse({"status": "not_found"}, status_code=404)
+
 @app.post("/api/soc/simulate")
 async def trigger_simulation():
     """Triggers the autonomous end-to-end APT attack & deception simulation."""
