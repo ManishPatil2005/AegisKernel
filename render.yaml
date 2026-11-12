@@ -1,0 +1,50 @@
+services:
+  # 1. FastAPI Control Plane & Agency Orchestrator Backend
+  - type: web
+    name: aegis-control-plane
+    runtime: python
+    region: oregon
+    plan: standard
+    buildCommand: "pip install -r agency/company/requirements.txt uvicorn fastapi"
+    startCommand: "uvicorn agency.company.server:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: AEGIS_API_TOKEN
+        generateValue: true
+      - key: PORT
+        value: 10000
+      - key: ENVIRONMENT
+        value: production
+
+  # 2. Next.js 3D WebGL Threat Hunting Dashboard
+  - type: web
+    name: aegis-soc-dashboard
+    runtime: node
+    region: oregon
+    plan: starter
+    rootDir: web/soc-dashboard
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start -- -p $PORT"
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: aegis-control-plane
+          property: host
+
+  # 3. Scheduled Autonomous Threat Hunting & Audit Cron Job
+  - type: cron
+    name: aegis-threat-hunt-cron
+    runtime: python
+    region: oregon
+    schedule: "0 */6 * * *" # Runs every 6 hours
+    buildCommand: "pip install -r services/ai-swarm/requirements.txt"
+    startCommand: "python scripts/run_e2e_simulation.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: cron-automation

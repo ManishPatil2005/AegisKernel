@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "cd web/soc-dashboard && npm install && npm run build",
+  "outputDirectory": "web/soc-dashboard/.next",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/console",
+      "destination": "/api/console"
+    }
+  ]
+}

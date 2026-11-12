@@ -1,0 +1,43 @@
+name: AegisKernel Scheduled Threat-Hunting & Security Audit Cron
+
+on:
+  schedule:
+    # Runs every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  scheduled-threat-hunt:
+    name: Autonomous Threat Hunting & Multi-Stage APT Emulation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Simulation & Security Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install z3-solver pydantic fastapi uvicorn httpx cryptography
+
+      - name: Execute End-to-End Autonomous Threat Hunting Simulation
+        run: |
+          python scripts/run_e2e_simulation.py
+
+      - name: Verify Cryptographic Evidence Vault HMAC Invariants
+        run: |
+          python services/forensics/evidence_vault.py
+
+      - name: Audit Memory & Formal Verification Invariants
+        run: |
+          python services/ai-swarm/swarm.py
+          python services/ai-swarm/consensus.py
+
+      - name: Log Audit Run Completion
+        run: |
+          echo "Scheduled threat-hunting cron job completed successfully at $(date -u)"
