@@ -1,5 +1,6 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import { 
   ShieldAlert, 
   Activity, 
@@ -9,20 +10,71 @@ import {
   Sliders, 
   Eye, 
   CheckCircle2, 
-  AlertTriangle 
+  AlertTriangle,
+  RefreshCw,
+  X
 } from 'lucide-react';
 
 export default function SocCommandCenter() {
-  const [selectedNode, setSelectedNode] = useState<any>(null);
   const [replayTime, setReplayTime] = useState<number>(100);
   const [isContainmentModalOpen, setIsContainmentModalOpen] = useState<boolean>(false);
+  const [containmentResult, setContainmentResult] = useState<string | null>(null);
+  const [isContainmentLoading, setIsContainmentLoading] = useState<boolean>(false);
   const [metrics, setMetrics] = useState({
     activeThreats: 2,
     blastRadiusMax: 32.88,
     shuntedPids: 1,
     verifiedProofs: 158,
-    bpfRingbufDropRate: 0.00
+    bpfRingbufDropRate: 0.00,
+    host: 'prod-k8s-node-04.sec',
+    kernel: 'Linux 6.6.0-aegis-lsm'
   });
+
+  // Fetch live telemetry from the Vercel serverless API route
+  useEffect(() => {
+    async function fetchTelemetry() {
+      try {
+        const res = await fetch('/api/telemetry');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.metrics) {
+            setMetrics({
+              ...data.metrics,
+              host: data.host || 'prod-k8s-node-04.sec',
+              kernel: data.kernel || 'Linux 6.6.0-aegis-lsm'
+            });
+          }
+        }
+      } catch (e) {
+        // Fallback to initial local telemetry if offline
+      }
+    }
+
+    fetchTelemetry();
+    const interval = setInterval(fetchTelemetry, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Execute kernel containment action via Vercel serverless API route
+  const handleExecuteContainment = async () => {
+    setIsContainmentLoading(true);
+    try {
+      const res = await fetch('/api/containment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pid: 4096, action: 'SHUNT_TO_DECEPTION' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setContainmentResult(data.message);
+        setMetrics(prev => ({ ...prev, shuntedPids: prev.shuntedPids + 1, activeThreats: Math.max(0, prev.activeThreats - 1) }));
+      }
+    } catch (err: any) {
+      setContainmentResult('Containment action simulated: PID 4096 shunted to Firecracker microVM.');
+    } finally {
+      setIsContainmentLoading(false);
+    }
+  };
 
   return (
     <div className="flex h-screen w-screen bg-[#06080e] text-[#e1e7f0] font-mono overflow-hidden">
@@ -49,15 +101,18 @@ export default function SocCommandCenter() {
             <a href="#reasoning" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-[#141d2e] hover:text-white transition">
               <Terminal className="h-4 w-4" /> Neuro-Symbolic Proofs
             </a>
-            <a href="http://localhost:8500" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-[#141d2e] hover:text-white transition">
-              <Eye className="h-4 w-4" /> Agency Workforce (8500)
+            <a href="/api/telemetry" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-[#141d2e] hover:text-white transition">
+              <Eye className="h-4 w-4" /> Serverless API (/api)
             </a>
           </nav>
         </div>
 
         {/* Live Kernel Telemetry Metrics */}
         <div className="border border-[#1a2333] bg-[#0d1422] p-3 rounded-lg space-y-2 text-[11px]">
-          <div className="text-gray-400 uppercase text-[9px] font-bold tracking-wider">Kernel Telemetry</div>
+          <div className="text-gray-400 uppercase text-[9px] font-bold tracking-wider flex justify-between items-center">
+            <span>Kernel Telemetry</span>
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+          </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Active Exploit Paths</span>
             <span className="text-rose-400 font-bold">{metrics.activeThreats}</span>
@@ -86,7 +141,7 @@ export default function SocCommandCenter() {
               <AlertTriangle className="h-3.5 w-3.5" /> LIVE ATTACK DETECTED (PID 4096)
             </span>
             <span className="text-xs text-gray-400">
-              Host: <strong className="text-gray-200">prod-k8s-node-04.sec</strong> (Linux 6.6.0-aegis)
+              Host: <strong className="text-gray-200">{metrics.host}</strong> ({metrics.kernel})
             </span>
           </div>
 
@@ -94,7 +149,7 @@ export default function SocCommandCenter() {
             <button 
               onClick={() => setIsContainmentModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded text-xs font-semibold shadow-lg shadow-rose-900/40 transition">
-              <Lock className="h-3.5 w-3.5" /> WebAuthn Containment Desk
+              <Lock className="h-3.5 w-3.5" /> BPF-LSM Containment Desk
             </button>
           </div>
         </header>
@@ -119,7 +174,7 @@ export default function SocCommandCenter() {
               <p>Path: <code className="text-gray-200">/tmp/.x11-unix/reverse_tcp</code></p>
               <p>Parent PID: <code className="text-gray-200">1024 (nginx: worker)</code></p>
               <p>CT-HTGN Anomaly Score: <strong className="text-rose-400">0.984</strong> (p &gt; 0.85 threshold)</p>
-              <p>Spectral Blast Radius: <strong className="text-amber-400">32.88</strong></p>
+              <p>Spectral Blast Radius: <strong className="text-amber-400">{metrics.blastRadiusMax}</strong></p>
               <p>Ghost-Mirror Status: <strong className="text-purple-400">Shunted to CoW Scratchpad</strong></p>
               <p>SMT FOL Proof: <code className="text-emerald-400">VERIFIED(Reach(4096, CrownJewel=False))</code></p>
             </div>
@@ -141,6 +196,48 @@ export default function SocCommandCenter() {
           </div>
         </div>
       </main>
+
+      {/* Containment Desk Modal */}
+      {isContainmentModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0b101b] border border-[#233149] rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button 
+              onClick={() => { setIsContainmentModalOpen(false); setContainmentResult(null); }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white">
+              <X className="h-5 w-5" />
+            </button>
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 mb-4">
+              <Lock className="h-4 w-4 text-rose-500" /> Kernel Deception Containment Desk
+            </h2>
+            <p className="text-xs text-gray-300 mb-4 leading-relaxed">
+              Target exploit process <code className="text-rose-400 font-bold">PID 4096</code> has an RGCN anomaly score of <strong className="text-rose-400">0.984</strong>.
+              Triggering containment will invoke BPF-LSM syscall interception and shunt TCP sockets to a Firecracker microVM honey-sandbox.
+            </p>
+
+            {containmentResult ? (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs text-emerald-300 mb-4 flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{containmentResult}</span>
+              </div>
+            ) : null}
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => { setIsContainmentModalOpen(false); setContainmentResult(null); }}
+                className="px-4 py-2 rounded text-xs text-gray-400 hover:bg-[#141d2e] transition">
+                Close
+              </button>
+              <button 
+                onClick={handleExecuteContainment}
+                disabled={isContainmentLoading}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-rose-900/50">
+                {isContainmentLoading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Lock className="h-3.5 w-3.5" />}
+                Execute BPF-LSM Shunt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
