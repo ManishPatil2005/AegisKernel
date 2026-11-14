@@ -25,6 +25,11 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 TEST_SUITES = [
     {
+        "name": "Zero-Trust Enterprise Runtime (CBAC, Taint, Landlock, HMAC Hash-Chain)",
+        "cmd": [sys.executable, str(ROOT_DIR / "tests" / "test_enterprise_runtime.py")],
+        "subsystem": "Enterprise Runtime"
+    },
+    {
         "name": "Z3 Neuro-Symbolic SMT Proof Gate",
         "cmd": [sys.executable, str(ROOT_DIR / "services" / "ai-swarm" / "swarm.py")],
         "subsystem": "AI Swarm"

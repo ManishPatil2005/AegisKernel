@@ -32,6 +32,7 @@ jobs:
       - name: Verify Cryptographic Evidence Vault HMAC Invariants
         run: |
           python services/forensics/evidence_vault.py
+          python tests/test_enterprise_runtime.py
 
       - name: Audit Memory & Formal Verification Invariants
         run: |
