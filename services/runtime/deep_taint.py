@@ -12,7 +12,7 @@ import json
 import uuid
 import time
 import base64
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Dict, Optional, List, Union, Set
 
 class TaintedString(str):
     """
@@ -102,14 +102,26 @@ class AegisJSONDecoder(json.JSONDecoder):
             )
         return dct
 
-def is_tainted(obj: Any) -> bool:
-    """Recursively checks if any value within an object bears a TaintedString wrapper."""
+def is_tainted(obj: Any, visited: Optional[Set[int]] = None) -> bool:
+    """
+    Recursively checks if any value within an object bears a TaintedString wrapper.
+    Utilizes object identity memoization to guarantee O(N) evaluation on deeply nested
+    or cyclic batch data structures, eliminating microsecond-level degradation.
+    """
     if isinstance(obj, TaintedString):
         return True
+    if not isinstance(obj, (list, tuple, set, dict)):
+        return False
+    if visited is None:
+        visited = set()
+    obj_id = id(obj)
+    if obj_id in visited:
+        return False
+    visited.add(obj_id)
     if isinstance(obj, (list, tuple, set)):
-        return any(is_tainted(item) for item in obj)
+        return any(is_tainted(item, visited) for item in obj)
     if isinstance(obj, dict):
-        return any(is_tainted(k) or is_tainted(v) for k, v in obj.items())
+        return any(is_tainted(k, visited) or is_tainted(v, visited) for k, v in obj.items())
     return False
 
 def sanitize_taint(val: TaintedString, validator_fn) -> str:
